@@ -10,8 +10,9 @@ Parent là **role phụ**, chủ yếu để xem. Làm gọn, không nặng như
 | Có | Chưa làm (để sau) |
 |---|---|
 | Admin tạo user Parent (chọn role **Parent** ở màn tạo tài khoản), gắn/gỡ con | Phụ huynh **thanh toán** học phí |
-| Phụ huynh xem hồ sơ, danh sách con | Chat realtime user-to-user (backend không chặn role, bật lại khi cần) |
-| Xem của con: **học phí**, kết quả, điểm danh, thời khoá biểu, lịch thi | Bài tập / bài nộp |
+| Phụ huynh xem/sửa hồ sơ (kèm upload ảnh đại diện như các role khác), danh sách con | Bài tập / bài nộp |
+| **Chat realtime** user-to-user (backend không chặn role, chủ yếu làm ở mobile) | |
+| Xem của con: **học phí** (chỉ xem), kết quả, điểm danh, thời khoá biểu, lịch thi | |
 | **AI chat** hỏi thông tin cơ bản về con (`ParentPlugin`, tái dùng logic `StudentPlugin`) | |
 
 ## 1. Backend
