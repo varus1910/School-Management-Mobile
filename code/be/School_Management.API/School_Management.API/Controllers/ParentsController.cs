@@ -12,10 +12,12 @@ namespace School_Management.API.Controllers
     public class ParentsController : ControllerBase
     {
         private readonly IParentService parentService;
+        private readonly IParentChildService parentChildService;
 
-        public ParentsController(IParentService parentService)
+        public ParentsController(IParentService parentService, IParentChildService parentChildService)
         {
             this.parentService = parentService;
+            this.parentChildService = parentChildService;
         }
 
         // ---------------- Admin ----------------
@@ -97,6 +99,24 @@ namespace School_Management.API.Controllers
 
             var result = await parentService.GetMyChildren(userId);
             return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("children/{studentId:guid}/fees")]
+        [ValidateModel]
+        [Authorize(Roles = "Parent")]
+        public async Task<IActionResult> GetChildFees([FromRoute] Guid studentId, [FromQuery] MyFeeDetailFilterRequest request)
+        {
+            if (!TryGetUserId(out var userId)) return InvalidSession();
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+
+            var result = await parentChildService.GetChildFees(userId, studentId, request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
         }
 
         private bool TryGetUserId(out Guid userId)

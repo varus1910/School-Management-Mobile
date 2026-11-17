@@ -164,6 +164,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IParentAccessService, ParentAccessService>();
 builder.Services.AddScoped<IParentService, ParentService>();
+builder.Services.AddScoped<IParentChildService, ParentChildService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
