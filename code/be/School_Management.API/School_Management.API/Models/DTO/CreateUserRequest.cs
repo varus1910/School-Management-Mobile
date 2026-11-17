@@ -49,5 +49,9 @@ namespace School_Management.API.Models.DTO
         public IFormFile? Avatar { get; set; }
         public Guid? ClassYearId { get; set; }
         public List<Guid>? SubjectId { get; set; }
+        //Chỉ dùng khi Role = Parent: danh sách học sinh (con) được gắn cho phụ huynh
+        public List<Guid>? StudentIds { get; set; }
+        [MaxLength(50, ErrorMessage = "Quan hệ quá dài")]
+        public string? Relationship { get; set; }
     }
 }
