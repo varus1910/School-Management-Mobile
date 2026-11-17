@@ -81,6 +81,17 @@ namespace School_Management.API.Repositories
             return (await GetChildrenByParentId(parentId.Value), "SUCCESS");
         }
 
+        public async Task<List<Guid>> GetParentUserIdsByStudentIds(IEnumerable<Guid> studentIds)
+        {
+            var ids = studentIds.Distinct().ToList();
+            return await context.ParentStudent
+                                .AsNoTracking()
+                                .Where(x => ids.Contains(x.StudentId))
+                                .Select(x => x.Parent!.UserId)
+                                .Distinct()
+                                .ToListAsync();
+        }
+
         public async Task<(ChildInfoResponse? data, string message)> LinkChild(Guid parentId, LinkChildRequest request)
         {
             var isParentExisted = await context.Parent.AnyAsync(x => x.Id == parentId);
