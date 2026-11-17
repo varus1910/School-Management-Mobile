@@ -162,6 +162,7 @@ builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
+builder.Services.AddScoped<IParentAccessService, ParentAccessService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
