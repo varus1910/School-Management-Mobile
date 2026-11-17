@@ -18,7 +18,7 @@ import { Image } from "expo-image";
 import { conversationService } from "../../services/conversation.service";
 
 interface EditGroupScreenProps {
-  rolePrefix?: "admin" | "teacher" | "student";
+  rolePrefix?: "admin" | "teacher" | "student" | "parent";
 }
 
 // Color constant based on the app's theme

@@ -21,7 +21,7 @@ import { useAuthStore } from "../../store/authStore";
 import { UserListItem } from "../../types/user";
 
 interface NewGroupScreenProps {
-  rolePrefix?: "admin" | "teacher" | "student";
+  rolePrefix?: "admin" | "teacher" | "student" | "parent";
 }
 
 // Color constant based on the app's theme

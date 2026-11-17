@@ -19,7 +19,7 @@ import { useAuthStore } from "../../store/authStore";
 import { UserListItem } from "../../types/user";
 
 interface AddMembersScreenProps {
-  rolePrefix?: "admin" | "teacher" | "student";
+  rolePrefix?: "admin" | "teacher" | "student" | "parent";
 }
 
 const PRIMARY_COLOR = "#136ADA";

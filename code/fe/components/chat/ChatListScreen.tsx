@@ -161,7 +161,7 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
 });
 
 interface ChatListScreenProps {
-  rolePrefix: "admin" | "teacher" | "student";
+  rolePrefix: "admin" | "teacher" | "student" | "parent";
 }
 
 export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {

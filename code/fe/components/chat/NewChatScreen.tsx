@@ -15,7 +15,7 @@ import { conversationService } from "../../services/conversation.service";
 import { UserListItem } from "../../types/user";
 
 interface NewChatScreenProps {
-  rolePrefix: "admin" | "teacher" | "student";
+  rolePrefix: "admin" | "teacher" | "student" | "parent";
 }
 
 export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
