@@ -77,8 +77,7 @@ const ROLE_CONFIG = {
     headerBg: "#14B8A6",
     label: "Phụ huynh",
     greeting:
-      "Xin chào quý phụ huynh! Mình là EduManage AI 🤖
-Mình có thể giúp tra cứu điểm, điểm danh, lịch học, lịch thi, học phí của con, sự kiện và nội quy trường học. Quý phụ huynh cần gì nào! 📚",
+      "Xin chào quý phụ huynh! Mình là EduManage AI 🤖\nMình có thể giúp tra cứu điểm, điểm danh, lịch học, lịch thi, học phí của con, sự kiện và nội quy trường học. Quý phụ huynh cần gì nào! 📚",
     suggestions: [
       "Học phí của con năm nay?",
       "Điểm học kì của con?",
