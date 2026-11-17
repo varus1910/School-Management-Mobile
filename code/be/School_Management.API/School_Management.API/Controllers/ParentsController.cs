@@ -61,5 +61,56 @@ namespace School_Management.API.Controllers
                 message = "Gỡ liên kết học sinh thành công"
             });
         }
+
+        // ---------------- Parent ----------------
+
+        [HttpGet]
+        [Route("me")]
+        [Authorize(Roles = "Parent")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            if (!TryGetUserId(out var userId)) return InvalidSession();
+
+            var result = await parentService.GetMyProfile(userId);
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("me")]
+        [ValidateModel]
+        [Authorize(Roles = "Parent")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateMyProfile([FromForm] UpdateAdminRequest request)
+        {
+            if (!TryGetUserId(out var userId)) return InvalidSession();
+
+            var result = await parentService.UpdateMyProfile(request, userId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("me/children")]
+        [Authorize(Roles = "Parent")]
+        public async Task<IActionResult> GetMyChildren()
+        {
+            if (!TryGetUserId(out var userId)) return InvalidSession();
+
+            var result = await parentService.GetMyChildren(userId);
+            return Ok(result);
+        }
+
+        private bool TryGetUserId(out Guid userId)
+        {
+            return Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
+        }
+
+        private IActionResult InvalidSession()
+        {
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+        }
     }
 }
