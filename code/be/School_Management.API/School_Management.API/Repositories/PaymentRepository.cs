@@ -16,13 +16,15 @@ namespace School_Management.API.Repositories
         private readonly ApplicationDbContext context;
         private readonly IHubContext<PaymentHub> _hubContext;
         private readonly INotificationService notificationService;
+        private readonly IParentRepository parentRepository;
         private readonly ILogger<PaymentRepository> logger;
 
-        public PaymentRepository(ApplicationDbContext context, IHubContext<PaymentHub> hubContext, INotificationService notificationService, ILogger<PaymentRepository> logger)
+        public PaymentRepository(ApplicationDbContext context, IHubContext<PaymentHub> hubContext, INotificationService notificationService, IParentRepository parentRepository, ILogger<PaymentRepository> logger)
         {
             this.context = context;
             _hubContext = hubContext;
             this.notificationService = notificationService;
+            this.parentRepository = parentRepository;
             this.logger = logger;
         }
         public async Task<IEnumerable<Payment>> GetMyPayments(Guid userId)
@@ -242,6 +244,28 @@ namespace School_Management.API.Repositories
                 Console.WriteLine($"Message: {ex.Message}");
                 Console.WriteLine($"Inner: {ex.InnerException?.Message}");
                 Console.WriteLine($"Stack: {ex.StackTrace}");
+            }
+
+            // Thông báo cho phụ huynh của học sinh (không ảnh hưởng đến kết quả thanh toán)
+            try
+            {
+                var parentUserIds = await parentRepository.GetParentUserIdsByStudentIds(new[] { student.Id });
+                if (parentUserIds.Count > 0)
+                {
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Content = payment.CourseId.HasValue
+                            ? $"Con bạn ({studentName}) đã mua khóa học [{itemName}]"
+                            : $"Con bạn ({studentName}) đã thanh toán [{itemName}]",
+                        Title = payment.CourseId.HasValue ? "Con mua khóa học mới" : "Con thanh toán học phí",
+                        Type = payment.CourseId.HasValue ? "Mua khóa học" : "Thanh toán học phí",
+                        UserId = parentUserIds
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification to parents failed");
             }
 
             return (true, "SUCCESS");
