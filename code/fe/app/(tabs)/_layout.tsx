@@ -22,6 +22,8 @@ export default function TabLayout() {
         router.replace("/admin");
       } else if (userInfo.role?.toLowerCase() === "teacher") {
         router.replace("/teacher");
+      } else if (userInfo.role?.toLowerCase() === "parent") {
+        router.replace("/parent");
       }
     }
   }, [userInfo]);
