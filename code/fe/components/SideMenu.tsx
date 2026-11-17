@@ -182,6 +182,8 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                     if (role === "ADMIN") router.push("/admin/profile");
                     else if (role === "TEACHER")
                       router.push("/teacher/edit-profile");
+                    else if (role === "PARENT")
+                      router.push("/parent/profile");
                     else router.push("/(tabs)/profile");
                   }}
                 >
