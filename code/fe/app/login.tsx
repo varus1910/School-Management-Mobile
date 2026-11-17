@@ -43,6 +43,8 @@ export default function LoginScreen() {
       router.replace("/admin" as Href);
     } else if (r === "teacher") {
       router.replace("/teacher" as Href);
+    } else if (r === "parent") {
+      router.replace("/parent" as Href);
     } else {
       router.replace("/home" as Href);
     }
