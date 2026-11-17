@@ -1,6 +1,7 @@
 using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
+using System.Security.Claims;
 
 namespace School_Management.API.Services
 {
@@ -12,8 +13,9 @@ namespace School_Management.API.Services
         private readonly IResultService resultService;
         private readonly IAttendanceService attendanceService;
         private readonly IScheduleService scheduleService;
+        private readonly IExamScheduleService examScheduleService;
 
-        public ParentChildService(IParentAccessService parentAccessService, IStudentRepository studentRepository, IFeeDetailService feeDetailService, IResultService resultService, IAttendanceService attendanceService, IScheduleService scheduleService)
+        public ParentChildService(IParentAccessService parentAccessService, IStudentRepository studentRepository, IFeeDetailService feeDetailService, IResultService resultService, IAttendanceService attendanceService, IScheduleService scheduleService, IExamScheduleService examScheduleService)
         {
             this.parentAccessService = parentAccessService;
             this.studentRepository = studentRepository;
@@ -21,6 +23,7 @@ namespace School_Management.API.Services
             this.resultService = resultService;
             this.attendanceService = attendanceService;
             this.scheduleService = scheduleService;
+            this.examScheduleService = examScheduleService;
         }
 
         public async Task<PagedResponse<FeeDetailResponse>> GetChildFees(Guid parentUserId, Guid studentId, MyFeeDetailFilterRequest request)
@@ -45,6 +48,16 @@ namespace School_Management.API.Services
         {
             var studentUserId = await ResolveStudentUserId(parentUserId, studentId);
             return await scheduleService.GetMyScheduleForStudent(request, studentUserId);
+        }
+
+        public async Task<List<MyExamScheduleDetailResponse>> GetChildExamSchedule(Guid parentUserId, Guid studentId, MyExamScheduleDetailRequest request)
+        {
+            var studentUserId = await ResolveStudentUserId(parentUserId, studentId);
+
+            // GetMyExamSchedule đọc userId và role từ ClaimsPrincipal. Tạo principal chỉ mang userId
+            // của học sinh (không có role Teacher) để nó đi vào nhánh dành cho học sinh.
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, studentUserId.ToString()) });
+            return await examScheduleService.GetMyExamSchedule(request, new ClaimsPrincipal(identity));
         }
 
         // Kiểm tra quyền sở hữu rồi trả về userId của học sinh để tái dùng các service của Student
