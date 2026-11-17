@@ -58,6 +58,8 @@ namespace School_Management.API.Repositories
                     chatKernel.Plugins.AddFromObject(new StudentPlugin(role, userId, context, studentRepository, scheduleRepository, kernel));
                 else if (role == "Teacher")
                     chatKernel.Plugins.AddFromObject(new TeacherPlugin(role, userId, context, scheduleRepository, teacherRepository, kernel));
+                else if (role == "Parent")
+                    chatKernel.Plugins.AddFromObject(new ParentPlugin(role, userId, context, studentRepository, scheduleRepository, kernel));
                 else if (role == "Admin")
                     chatKernel.Plugins.AddFromObject(new AdminPlugin(role, userId, context, userManager, roleManager));
 
@@ -76,6 +78,9 @@ namespace School_Management.API.Repositories
                                                 7. STRICT RULE: Tuyệt đối KHÔNG sử dụng định dạng bảng (Markdown Table) cho danh sách. Hãy sử dụng định dạng danh sách có ký hiệu đầu dòng (Bullet points) hoặc đánh số. Mỗi mục phải phân tách rõ ràng bằng xuống dòng.
                                                 8. Nếu người dùng hỏi về nghiệp vụ, và không có plugin đáp ứng cho ra dữ liệu được, hãy tìm kiếm về hướng dẫn sử dụng, thao tác app và tiến hành định hướng bước làm cho người dùng để họ đạt được mục tiêu rồi trả lời cho phù hợp, NẾU KHÔNG CÓ DỮ LIỆU PHÙ HỢP TUYỆT ĐỐI KO BỊA
                                                 9. ""Hãy ưu tiên dữ liệu trong Context. Nếu câu hỏi của người dùng có ý nghĩa tương đồng với chỉ dẫn trong Context (ví dụ: 'đổi mật khẩu' và 'thay đổi pass'), hãy dùng dữ liệu đó để trả lời."".");
+
+                if (role == "Parent")
+                    chatHistory.AddSystemMessage("Người dùng hiện tại là PHỤ HUYNH. Phụ huynh chỉ được xem thông tin của chính các con mình thông qua các hàm của phụ huynh. Nếu phụ huynh có nhiều con mà chưa nói rõ tên con thì phải hỏi lại tên con. Không cung cấp thông tin của học sinh khác.");
 
                 foreach (var message in messages)
                 {
