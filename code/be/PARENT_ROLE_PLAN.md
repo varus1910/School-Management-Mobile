@@ -51,6 +51,13 @@ Chưa đọc chi tiết; trước khi làm sẽ đọc `app/index.tsx`, `login.t
 - `app/parent/`: trang chủ (chọn con), fees (chỉ xem), results, attendance, timetable, exam-schedule, notifications, ai-chat (sao chép từ `student/ai-chat`).
 - `app/admin/users/create.tsx`: danh sách role lấy từ API nên `Parent` tự hiện sau khi seed, nhưng chỗ hiển thị nhãn theo tên role (đang có `Teacher`/`Student`) phải thêm `Parent`; thêm ô chọn con khi role là Parent. Kiểm tra thêm `admin/users/index.tsx`.
 
+## 2b. Thông báo cho phụ huynh (3 loại, không thêm API mới)
+Thêm hàm lấy `userId` phụ huynh theo danh sách `studentId`, rồi thêm một khối thông báo phụ (bọc `try/catch`, không làm hỏng việc chính) vào:
+1. `FeeRepository`: tạo học phí mới cho lớp → "Con bạn có học phí mới năm học ...".
+2. `PaymentRepository.ProcessWebhook`: con thanh toán học phí → "Học sinh X đã thanh toán [lý do]".
+3. `PaymentRepository.ProcessWebhook`: con mua khoá học → "Học sinh X đã mua khoá học [tên]".
+Gộp theo từng phụ huynh để không gửi trùng. Học phí tạo riêng (`FeeDetailRepository`) và điểm danh: để sau.
+
 ## 3. Thứ tự làm
 1. Tạo nhánh `feature/parent-role`.
 2. BE: entity, config, seed role, migration (chưa áp DB).
