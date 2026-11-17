@@ -7,5 +7,6 @@ namespace School_Management.API.Services
     public interface IParentChildService
     {
         public Task<PagedResponse<FeeDetailResponse>> GetChildFees(Guid parentUserId, Guid studentId, MyFeeDetailFilterRequest request);
+        public Task<ResultForStudentResponse> GetChildResults(Guid parentUserId, Guid studentId, ResultOfStudentRequest request);
     }
 }

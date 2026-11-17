@@ -9,18 +9,26 @@ namespace School_Management.API.Services
         private readonly IParentAccessService parentAccessService;
         private readonly IStudentRepository studentRepository;
         private readonly IFeeDetailService feeDetailService;
+        private readonly IResultService resultService;
 
-        public ParentChildService(IParentAccessService parentAccessService, IStudentRepository studentRepository, IFeeDetailService feeDetailService)
+        public ParentChildService(IParentAccessService parentAccessService, IStudentRepository studentRepository, IFeeDetailService feeDetailService, IResultService resultService)
         {
             this.parentAccessService = parentAccessService;
             this.studentRepository = studentRepository;
             this.feeDetailService = feeDetailService;
+            this.resultService = resultService;
         }
 
         public async Task<PagedResponse<FeeDetailResponse>> GetChildFees(Guid parentUserId, Guid studentId, MyFeeDetailFilterRequest request)
         {
             var studentUserId = await ResolveStudentUserId(parentUserId, studentId);
             return await feeDetailService.GetAllMyFeeForStudent(request, studentUserId);
+        }
+
+        public async Task<ResultForStudentResponse> GetChildResults(Guid parentUserId, Guid studentId, ResultOfStudentRequest request)
+        {
+            var studentUserId = await ResolveStudentUserId(parentUserId, studentId);
+            return await resultService.GetMyResultForStudent(request, studentUserId);
         }
 
         // Kiểm tra quyền sở hữu rồi trả về userId của học sinh để tái dùng các service của Student
