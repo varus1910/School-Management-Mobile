@@ -147,6 +147,18 @@ namespace School_Management.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("children/{studentId:guid}/schedule")]
+        [ValidateModel]
+        [Authorize(Roles = "Parent")]
+        public async Task<IActionResult> GetChildSchedule([FromRoute] Guid studentId, [FromQuery] ScheduleDetailIsActiveRequest request)
+        {
+            if (!TryGetUserId(out var userId)) return InvalidSession();
+
+            var result = await parentChildService.GetChildSchedule(userId, studentId, request);
+            return Ok(result);
+        }
+
         private bool TryGetUserId(out Guid userId)
         {
             return Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
