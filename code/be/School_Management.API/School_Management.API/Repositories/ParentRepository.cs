@@ -81,6 +81,43 @@ namespace School_Management.API.Repositories
             return (await GetChildrenByParentId(parentId.Value), "SUCCESS");
         }
 
+        public async Task<(ChildInfoResponse? data, string message)> LinkChild(Guid parentId, LinkChildRequest request)
+        {
+            var isParentExisted = await context.Parent.AnyAsync(x => x.Id == parentId);
+            if (!isParentExisted) return (null, "NOT_FOUND_PARENT");
+
+            var isStudentExisted = await context.Student.AnyAsync(x => x.Id == request.StudentId);
+            if (!isStudentExisted) return (null, "NOT_FOUND_STUDENT");
+
+            var isLinked = await context.ParentStudent.AnyAsync(x => x.ParentId == parentId && x.StudentId == request.StudentId);
+            if (isLinked) return (null, "CONFLICT_CHILD");
+
+            context.ParentStudent.Add(new ParentStudent
+            {
+                ParentStudentId = Guid.NewGuid(),
+                ParentId = parentId,
+                StudentId = request.StudentId,
+                Relationship = request.Relationship?.Trim()
+            });
+            await context.SaveChangesAsync();
+
+            var children = await GetChildrenByParentId(parentId);
+            return (children.First(x => x.StudentId == request.StudentId), "SUCCESS");
+        }
+
+        public async Task<(bool result, string message)> UnlinkChild(Guid parentId, Guid studentId)
+        {
+            var isParentExisted = await context.Parent.AnyAsync(x => x.Id == parentId);
+            if (!isParentExisted) return (false, "NOT_FOUND_PARENT");
+
+            var link = await context.ParentStudent.FirstOrDefaultAsync(x => x.ParentId == parentId && x.StudentId == studentId);
+            if (link == null) return (false, "NOT_FOUND_LINK");
+
+            context.ParentStudent.Remove(link);
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
+        }
+
         private async Task<(ParentInfoResponse? data, string message)> GetParentInfo(Expression<Func<Parent, bool>> predicate)
         {
             var parent = await context.Parent
