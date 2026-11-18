@@ -12,6 +12,7 @@ import { reportGenerator } from "../../utils/reportGenerator";
 import {
   FloatingBody,
   HeroChip,
+  HeroProfileCard,
   HomeHero,
   ListRow,
   SectionCard,
@@ -51,7 +52,6 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { userInfo } = useAuthStore();
   const { schoolYear } = useConfigStore();
-  const adminName = userInfo?.fullName?.split(" ").at(-1) ?? "Quản trị viên";
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -126,10 +126,15 @@ export default function AdminDashboard() {
       >
         <HomeHero
           eyebrow={`${greeting()} 👋`}
-          title={`Quản trị viên ${adminName}`}
-          subtitle={`Bảng điều khiển năm học ${schoolYear} - ${schoolYear + 1}`}
-          right={<HeroChip icon="calendar" label={`${schoolYear}`} />}
-        />
+          right={<HeroChip icon="calendar" label={`Năm học ${schoolYear} - ${schoolYear + 1}`} />}
+        >
+          <HeroProfileCard
+            name={userInfo?.fullName ?? "Quản trị viên"}
+            avatarUrl={userInfo?.avatarUrl}
+            label="Quản trị viên"
+            subtitle="Bảng điều khiển nhà trường"
+          />
+        </HomeHero>
 
         <FloatingBody>
           {/* Hai chỉ số quan trọng nhất */}
