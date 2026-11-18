@@ -7,8 +7,8 @@ import { View, ActivityIndicator } from "react-native";
 import { useAuthStore } from "../../store/authStore";
 import { useParentStore } from "../../store/parentStore";
 import { useEffect } from "react";
-
 import { RoleTabsFrame } from "../../components/RoleTabBar";
+
 export default function ParentLayout() {
   const userInfo = useAuthStore((state) => (state as any).userInfo);
   const isLoading = useAuthStore((state) => (state as any).isLoading);
