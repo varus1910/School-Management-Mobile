@@ -437,7 +437,8 @@ namespace School_Management.API.Services
                     UserName = createUserRequest.Username?.Trim(),
                     Address = createUserRequest.Address?.Trim(),
                     PhoneNumber = createUserRequest.PhoneNumber,
-                    Birthday = birthday1,
+                    // Npgsql chỉ nhận DateTimeOffset có offset 0 (UTC); DateTime Unspecified sẽ bị đổi sang giờ máy (+07) nên phải chỉ rõ UTC.
+                    Birthday = new DateTimeOffset(DateTime.SpecifyKind(birthday1, DateTimeKind.Utc)),
                     FullName = createUserRequest.FullName?.Trim(),
                     Email = createUserRequest.Email,
                     AvatarUrl = avatarUrl ?? "",
