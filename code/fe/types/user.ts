@@ -54,6 +54,8 @@ export interface CreateUserPayload {
   roleId: string;
   classYearId?: string; // Required if role = Student
   subjectId?: string[];   // Required if role = Teacher (Array of strings as per cURL)
+  studentIds?: string[];  // Optional if role = Parent (children to link)
+  relationship?: string;  // Optional if role = Parent (Bố / Mẹ / Người giám hộ)
 }
 
 export interface UpdateUserPayload {
