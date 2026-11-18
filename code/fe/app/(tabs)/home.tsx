@@ -20,6 +20,7 @@ import {
   EmptyLine,
   FloatingBody,
   HeroChip,
+  HeroProfileCard,
   HomeHero,
   LessonTimeline,
   ListRow,
@@ -55,7 +56,6 @@ export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
   const { schoolYear, term } = useConfigStore();
   const { userInfo } = useAuthStore();
-  const firstName = userInfo?.fullName?.split(" ").at(-1) ?? "Học sinh";
   const overview = useStudentOverview();
 
   const pending = overview.pendingAssignments;
@@ -82,10 +82,15 @@ export default function HomeScreen() {
       >
         <HomeHero
           eyebrow={`${greeting()} 👋`}
-          title={firstName}
-          subtitle={`Năm học ${schoolYear} - ${schoolYear + 1} • Học kỳ ${term}`}
-          right={overview.className ? <HeroChip icon="school" label={`Lớp ${overview.className}`} /> : undefined}
-        />
+          right={<HeroChip icon="calendar" label={`Năm học ${schoolYear} • HK${term}`} />}
+        >
+          <HeroProfileCard
+            name={userInfo?.fullName ?? "Học sinh"}
+            avatarUrl={userInfo?.avatarUrl}
+            label="Học sinh"
+            subtitle={overview.className ? `Lớp ${overview.className}` : "Chưa có lớp"}
+          />
+        </HomeHero>
 
         <FloatingBody>
           <View className="flex-row gap-3">

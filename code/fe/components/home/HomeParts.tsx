@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ReactNode } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
@@ -79,6 +80,54 @@ export function HeroChip({ icon, label }: { icon: string; label: string }) {
       <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-white text-[11px] ml-1.5">
         {label}
       </Text>
+    </View>
+  );
+}
+
+/** Thẻ hồ sơ trong khối xanh: ảnh đại diện + tên nổi bật (dùng cho tài khoản học sinh). */
+export function HeroProfileCard({
+  name,
+  avatarUrl,
+  label,
+  subtitle,
+}: {
+  name: string;
+  avatarUrl?: string | null;
+  label: string;
+  subtitle?: string;
+}) {
+  const initial = name.trim().split(" ").at(-1)?.[0]?.toUpperCase() ?? "?";
+  return (
+    <View className="mt-4 bg-white/15 rounded-3xl p-4 flex-row items-center">
+      {avatarUrl ? (
+        <Image
+          source={{ uri: avatarUrl }}
+          style={{ width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: "rgba(255,255,255,0.6)" }}
+          contentFit="cover"
+        />
+      ) : (
+        <View
+          className="bg-white/25 items-center justify-center"
+          style={{ width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: "rgba(255,255,255,0.6)" }}
+        >
+          <Text style={{ fontFamily: "Poppins-Bold", fontSize: 26 }} className="text-white">
+            {initial}
+          </Text>
+        </View>
+      )}
+      <View className="ml-4 flex-1">
+        <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-amber-200 text-[10px] uppercase tracking-widest">
+          {label}
+        </Text>
+        <Text numberOfLines={1} style={{ fontFamily: "Poppins-Bold" }} className="text-white text-xl">
+          {name}
+        </Text>
+        {subtitle ? (
+          <Text numberOfLines={1} style={{ fontFamily: "Poppins-Medium" }} className="text-white/80 text-xs">
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }
