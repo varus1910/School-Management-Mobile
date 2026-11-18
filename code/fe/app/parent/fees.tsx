@@ -81,11 +81,35 @@ export default function ParentFeesScreen() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 140 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#3B82F6']} />
         }
       >
+        {!loading && fees.length > 0 && (
+          <View className="rounded-[28px] p-5 mb-5" style={{ backgroundColor: "#136ADA" }}>
+            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-white/80 text-xs uppercase tracking-widest">
+              Tổng cần đóng
+            </Text>
+            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-3xl mt-1">
+              {totalDue.toLocaleString()} <Text className="text-base">VNĐ</Text>
+            </Text>
+            <View className="h-2 bg-white/25 rounded-full overflow-hidden mt-4">
+              <View
+                className="h-full bg-white"
+                style={{ width: `${(fees.filter((f) => f.status === "Đã đóng").length / fees.length) * 100}%` }}
+              />
+            </View>
+            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-white/80 text-xs mt-2">
+              {fees.filter((f) => f.status !== "Đã đóng").length} khoản chưa đóng •{" "}
+              {fees.filter((f) => f.status === "Đã đóng").length} khoản đã đóng
+            </Text>
+            <Text style={{ fontFamily: "Poppins-Regular" }} className="text-white/70 text-[10px] mt-3">
+              Học sinh thanh toán học phí trong ứng dụng hoặc đóng trực tiếp tại trường.
+            </Text>
+          </View>
+        )}
+
         {loading && !refreshing ? (
           <View className="flex-1 items-center justify-center py-20">
             <ActivityIndicator size="large" color="#3B82F6" />
@@ -96,26 +120,6 @@ export default function ParentFeesScreen() {
           fees.map((item) => <FeeCard key={item.id} data={item} />)
         )}
       </ScrollView>
-
-      {/* Information Banner (chỉ xem, không thanh toán) */}
-      <View
-        className="absolute bottom-6 left-6 right-6 bg-white p-5 rounded-[24px] shadow-xl shadow-blue-100 border border-blue-50"
-      >
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs uppercase tracking-wider">Tổng cần đóng</Text>
-            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-xl">
-              {totalDue.toLocaleString()} VNĐ
-            </Text>
-          </View>
-          <View className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center">
-            <Ionicons name="information-circle-outline" size={22} color="#3B82F6" />
-          </View>
-        </View>
-        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px] mt-3">
-          Học sinh thanh toán học phí trong ứng dụng hoặc đóng trực tiếp tại trường.
-        </Text>
-      </View>
     </View>
   );
 }
