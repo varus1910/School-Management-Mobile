@@ -19,6 +19,7 @@ import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { studentService } from "../../../services/student.service";
 import { StudentResponse } from "../../../types/student";
 import { getErrorMessage } from "../../../utils/error";
+import { ProfileHero } from "../../../components/ui/ProfileParts";
 
 export default function AdminStudentDetailScreen() {
   const router = useRouter();
@@ -114,9 +115,9 @@ export default function AdminStudentDetailScreen() {
     );
 
   const InfoRow = ({ label, value, icon }: any) => (
-    <View className="flex-row items-center p-4 border-b border-gray-50 bg-white">
-      <View className="w-9 h-9 rounded-full bg-gray-50 items-center justify-center mr-3">
-        <Ionicons name={icon} size={18} color="#9CA3AF" />
+    <View className="flex-row items-center bg-white p-4 mb-3 mx-6 rounded-3xl border border-gray-100">
+      <View className="w-11 h-11 rounded-2xl bg-blue-50 items-center justify-center mr-4">
+        <Ionicons name={icon} size={20} color="#136ADA" />
       </View>
       <View className="flex-1">
         <Text
@@ -157,54 +158,12 @@ export default function AdminStudentDetailScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        {/* Profile Card */}
-        <View className="bg-white items-center py-8 border-b border-gray-100">
-          <View className="w-24 h-24 rounded-full bg-blue-100 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
-            {student.avatarUrl ? (
-              <Image className="rounded-full" 
-                source={{ uri: student.avatarUrl }} 
-                style={{ width: 96, height: 96, borderRadius: 9999 }}
-                contentFit="cover"
-                transition={200}
-              />
-            ) : (
-              <Text
-                style={{
-                  fontFamily: "Poppins-Bold",
-                  color: "#136ADA",
-                  fontSize: 36,
-                }}
-              >
-                {student.fullName.charAt(0)}
-              </Text>
-            )}
-          </View>
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-black text-xl"
-          >
-            {student.fullName}
-          </Text>
-          <View className="flex-row items-center gap-2 mt-1">
-            <View className="bg-teal-50 px-3 py-1 rounded-full">
-              <Text
-                style={{
-                  fontFamily: "Poppins-SemiBold",
-                  fontSize: 10,
-                  color: "#0D9488",
-                }}
-              >
-                Lớp {displayClass?.className || "Chưa xếp lớp"}
-              </Text>
-            </View>
-            <Text
-              style={{ fontFamily: "Poppins-Regular" }}
-              className="text-gray-400 text-xs"
-            >
-              Khối {displayClass?.grade || 0}
-            </Text>
-          </View>
-        </View>
+        <ProfileHero
+          name={student.fullName}
+          avatarUrl={student.avatarUrl}
+          roleLabel={`Lớp ${displayClass?.className || "Chưa xếp lớp"} • Khối ${displayClass?.grade || 0}`}
+          fallbackInitial={student.fullName?.charAt(0) || "S"}
+        />
 
         {isEditing ? (
           <View className="p-6">
@@ -238,7 +197,7 @@ export default function AdminStudentDetailScreen() {
             />
           </View>
         ) : (
-          <View className="py-6">
+          <View className="pt-6 pb-4">
             <InfoRow label="Họ và tên" value={student.fullName} icon="person-outline" />
             <InfoRow label="Email" value={student.email} icon="mail-outline" />
             <InfoRow label="Số điện thoại" value={student.phoneNumber} icon="call-outline" />
