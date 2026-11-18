@@ -29,7 +29,7 @@ const USER_MIN_STREAM_CHARS_PER_TICK = 2;
 const USER_MAX_STREAM_CHARS_PER_TICK = 20;
 const USER_TARGET_STREAM_DURATION_MS = 2500;
 
-function getStreamCharsPerTick(contentLength: number, role: "Student" | "Teacher" | "Admin") {
+function getStreamCharsPerTick(contentLength: number, role: "Student" | "Teacher" | "Admin" | "Parent") {
   if (role === "Admin") return ADMIN_CHARS_PER_TICK;
 
   const targetTicks = USER_TARGET_STREAM_DURATION_MS / STREAM_TICK_MS;
@@ -53,7 +53,7 @@ interface ActiveStream {
 }
 
 interface Props {
-  role: "Student" | "Teacher" | "Admin";
+  role: "Student" | "Teacher" | "Admin" | "Parent";
 }
 
 const ROLE_CONFIG = {
@@ -68,6 +68,20 @@ const ROLE_CONFIG = {
       "Điểm học kì của tôi?",
       "Lịch thi sắp tới?",
       "Học phí học kì này?",
+      "Nội quy nhà trường?",
+    ],
+  },
+  Parent: {
+    accent: "#14B8A6",
+    accentLight: "#E6FAF7",
+    headerBg: "#14B8A6",
+    label: "Phụ huynh",
+    greeting:
+      "Xin chào quý phụ huynh! Mình là EduManage AI 🤖\nMình có thể giúp tra cứu điểm, điểm danh, lịch học, lịch thi, học phí của con, sự kiện và nội quy trường học. Quý phụ huynh cần gì nào! 📚",
+    suggestions: [
+      "Học phí của con năm nay?",
+      "Điểm học kì của con?",
+      "Con đi học tháng này thế nào?",
       "Nội quy nhà trường?",
     ],
   },

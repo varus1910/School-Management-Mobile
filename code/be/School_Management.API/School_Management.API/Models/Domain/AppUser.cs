@@ -16,6 +16,7 @@ namespace School_Management.API.Models.Domain
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public Student? Student { get; set; }
         public Teacher? Teacher { get; set; }
+        public Parent? Parent { get; set; }
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public ICollection<AIChatHistory> AIChatHistories { get; set; } = new List<AIChatHistory>();
         public ICollection<UserConversation> UserConversations { get; set; } = new List<UserConversation>();

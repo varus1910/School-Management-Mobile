@@ -20,6 +20,7 @@ import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { UserResponse } from "../../../types/user";
 import { RoleResponse } from "../../../types/role";
 import { getErrorMessage } from "../../../utils/error";
+import { ProfileHero } from "../../../components/ui/ProfileParts";
 
 const ROLE_COLORS: Record<string, { bg: string; text: string; label: string }> =
   {
@@ -196,8 +197,8 @@ export default function AdminUserDetailScreen() {
 
   const InfoRow = ({ icon, label, value }: any) => (
     <View className="flex-row items-center gap-3 py-3 border-b border-gray-50">
-      <View className="w-8 h-8 rounded-full bg-gray-50 items-center justify-center">
-        <Ionicons name={icon} size={16} color="#9CA3AF" />
+      <View className="w-10 h-10 rounded-2xl bg-blue-50 items-center justify-center">
+        <Ionicons name={icon} size={18} color="#136ADA" />
       </View>
       <View className="flex-1">
         <Text
@@ -229,60 +230,22 @@ export default function AdminUserDetailScreen() {
       }
     >
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Profile Card */}
-        <View className="bg-white mx-4 mt-4 rounded-3xl p-5 border border-gray-100 items-center">
-          <View className="w-20 h-20 rounded-full bg-blue-100 items-center justify-center mb-3 overflow-hidden">
-            {user.avatarUrl ? (
-              <Image className="rounded-full" 
-                source={{ uri: user.avatarUrl }} 
-                style={{ width: 80, height: 80, borderRadius: 9999 }}
-                contentFit="cover"
-                transition={200}
-              />
-            ) : (
-              <Text
-                style={{
-                  fontFamily: "Poppins-Bold",
-                  color: "#136ADA",
-                  fontSize: 30,
-                }}
-              >
-                {user.fullName ? user.fullName.charAt(0) : "?"}
-              </Text>
-            )}
-          </View>
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-black text-xl mb-1 text-center"
-          >
-            {user.fullName}
-          </Text>
-          <View
-            style={{ backgroundColor: roleColor.bg }}
-            className="px-3 py-1 rounded-full mb-2"
-          >
-            <Text
-              style={{
-                fontFamily: "Poppins-Medium",
-                color: roleColor.text,
-                fontSize: 12,
-              }}
-            >
-              {roleColor.label || user.role}
-            </Text>
-          </View>
-          {isLocked && (
-            <View className="flex-row items-center gap-1 bg-red-50 px-3 py-1 rounded-full">
+        <ProfileHero
+          name={user.fullName}
+          avatarUrl={user.avatarUrl}
+          roleLabel={roleColor.label || user.role}
+          fallbackInitial={user.fullName ? user.fullName.charAt(0) : "?"}
+        />
+        {isLocked && (
+          <View className="items-center -mt-3">
+            <View className="flex-row items-center gap-1 bg-red-50 border border-red-100 px-4 py-1.5 rounded-full">
               <Ionicons name="lock-closed" size={12} color="#EF4444" />
-              <Text
-                style={{ fontFamily: "Poppins-Medium", fontSize: 11 }}
-                className="text-red-500"
-              >
+              <Text style={{ fontFamily: "Poppins-Medium", fontSize: 11 }} className="text-red-500">
                 Tài khoản bị khóa
               </Text>
             </View>
-          )}
-        </View>
+          </View>
+        )}
 
         {/* Info */}
         <View className="bg-white mx-4 mt-3 rounded-2xl px-4 border border-gray-100">

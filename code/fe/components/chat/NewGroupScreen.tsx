@@ -5,12 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
   ScrollView,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -21,7 +21,7 @@ import { useAuthStore } from "../../store/authStore";
 import { UserListItem } from "../../types/user";
 
 interface NewGroupScreenProps {
-  rolePrefix?: "admin" | "teacher" | "student";
+  rolePrefix?: "admin" | "teacher" | "student" | "parent";
 }
 
 // Color constant based on the app's theme

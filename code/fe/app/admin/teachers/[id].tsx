@@ -24,6 +24,7 @@ import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { TeacherResponse, TeacherSubject } from "../../../types/teacher";
 import { SubjectResponse } from "../../../types/subject";
 import { getErrorMessage } from "../../../utils/error";
+import { ProfileHero } from "../../../components/ui/ProfileParts";
 
 export default function AdminTeacherDetailScreen() {
   const router = useRouter();
@@ -171,9 +172,9 @@ export default function AdminTeacherDetailScreen() {
     );
 
   const InfoRow = ({ label, value, icon }: any) => (
-    <View className="flex-row items-center p-4 border-b border-gray-50 bg-white">
-      <View className="w-9 h-9 rounded-full bg-gray-50 items-center justify-center mr-3">
-        <Ionicons name={icon} size={18} color="#9CA3AF" />
+    <View className="flex-row items-center bg-white p-4 mb-3 mx-6 rounded-3xl border border-gray-100">
+      <View className="w-11 h-11 rounded-2xl bg-blue-50 items-center justify-center mr-4">
+        <Ionicons name={icon} size={20} color="#136ADA" />
       </View>
       <View className="flex-1">
         <Text
@@ -213,35 +214,12 @@ export default function AdminTeacherDetailScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        {/* Profile Card */}
-        <View className="bg-white items-center py-8 border-b border-gray-100">
-          <View className="w-24 h-24 rounded-full bg-purple-100 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
-            {teacher.avatarUrl ? (
-              <Image className="rounded-full" 
-                source={{ uri: teacher.avatarUrl }} 
-                style={{ width: 96, height: 96, borderRadius: 9999 }}
-                contentFit="cover"
-                transition={200}
-              />
-            ) : (
-              <Text
-                style={{
-                  fontFamily: "Poppins-Bold",
-                  color: "#A855F7",
-                  fontSize: 36,
-                }}
-              >
-                {teacher.fullName.charAt(0)}
-              </Text>
-            )}
-          </View>
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-black text-xl"
-          >
-            {teacher.fullName}
-          </Text>
-        </View>
+        <ProfileHero
+          name={teacher.fullName}
+          avatarUrl={teacher.avatarUrl}
+          roleLabel="Giáo viên"
+          fallbackInitial={teacher.fullName?.charAt(0) || "T"}
+        />
 
         {isEditing ? (
           <View className="p-6">

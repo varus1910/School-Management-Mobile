@@ -5,12 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -18,7 +18,7 @@ import { Image } from "expo-image";
 import { conversationService } from "../../services/conversation.service";
 
 interface EditGroupScreenProps {
-  rolePrefix?: "admin" | "teacher" | "student";
+  rolePrefix?: "admin" | "teacher" | "student" | "parent";
 }
 
 // Color constant based on the app's theme
@@ -150,13 +150,13 @@ export default function EditGroupScreen({ rolePrefix: rolePrefixProp }: EditGrou
                   transition={200}
                 />
               ) : (
-                <Ionicons name="camera-outline" size={40} color="#6366F1" />
+                <Ionicons name="camera-outline" size={40} color="#136ADA" />
               )}
             </TouchableOpacity>
             <TouchableOpacity onPress={handlePickGroupAvatar}>
               <Text
                 style={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
-                className="text-indigo-600 mt-4"
+                className="text-[#136ADA] mt-4"
               >
                 Thay đổi ảnh nhóm
               </Text>
@@ -210,11 +210,11 @@ export default function EditGroupScreen({ rolePrefix: rolePrefixProp }: EditGrou
             <TouchableOpacity
               style={{
                 flex: 1,
-                backgroundColor: "#4F46E5",
+                backgroundColor: "#136ADA",
                 paddingVertical: 16,
                 borderRadius: 16,
                 alignItems: "center",
-                shadowColor: "#4F46E5",
+                shadowColor: "#136ADA",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.2,
                 shadowRadius: 8,

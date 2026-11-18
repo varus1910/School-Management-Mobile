@@ -5,12 +5,12 @@ import {
   FlatList,
   Modal,
   RefreshControl,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
   TouchableWithoutFeedback,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
@@ -145,25 +145,44 @@ const ExamScheduleDetail = () => {
 
   const renderSlot = ({ item }: { item: ExamScheduleDetailResponse }) => (
     <TouchableOpacity
-      className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm"
+      activeOpacity={0.85}
+      className="bg-white rounded-3xl p-4 mb-3 border border-gray-100 shadow-sm flex-row"
       onPress={() => router.push(`/admin/exam-schedules/slot/${item.examScheduleDetailId}`)}
     >
-      <View className="flex-row justify-between items-start mb-2">
-        <View className="flex-1 mr-2">
-          <Text className="text-gray-900 font-bold text-base">{item.subjectName}</Text>
-          <Text className="text-gray-500 text-xs mt-0.5">Phòng: {item.roomName}</Text>
-        </View>
-        <View className="bg-blue-50 px-2 py-1 rounded">
-          <Text className="text-blue-600 text-[10px] font-bold">SLOT: {item.startTime.substring(0, 5)} - {item.finishTime.substring(0, 5)}</Text>
-        </View>
+      <View className="w-20 rounded-2xl bg-blue-50 items-center justify-center py-3">
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-base">
+          {item.startTime.substring(0, 5)}
+        </Text>
+        <View className="w-4 h-[2px] bg-blue-200 my-1" />
+        <Text style={{ fontFamily: "Poppins-Medium" }} className="text-blue-400 text-xs">
+          {item.finishTime.substring(0, 5)}
+        </Text>
       </View>
 
-      <View className="border-t border-gray-50 pt-2 flex-row justify-between items-center">
-        <View className="flex-row items-center">
-          <Ionicons name="person-outline" size={14} color="#6B7280" />
-          <Text className="text-gray-500 text-xs ml-1">{item.teacherName}</Text>
+      <View className="flex-1 ml-4 justify-center">
+        <Text numberOfLines={1} style={{ fontFamily: "Poppins-Bold" }} className="text-gray-900 text-base">
+          {item.subjectName}
+        </Text>
+        <View className="flex-row items-center mt-1">
+          <Ionicons name="location-outline" size={13} color="#9CA3AF" />
+          <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs ml-1">
+            Phòng {item.roomName}
+          </Text>
         </View>
-        <Text className="text-gray-400 text-[10px] italic">{item.date}</Text>
+        <View className="flex-row items-center justify-between mt-1">
+          <View className="flex-row items-center flex-1">
+            <Ionicons name="person-outline" size={13} color="#9CA3AF" />
+            <Text numberOfLines={1} style={{ fontFamily: "Poppins-Regular" }} className="text-gray-500 text-xs ml-1 flex-1">
+              {item.teacherName}
+            </Text>
+          </View>
+          <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">
+            {item.date}
+          </Text>
+        </View>
+      </View>
+      <View className="justify-center ml-1">
+        <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
       </View>
     </TouchableOpacity>
   );
@@ -178,9 +197,9 @@ const ExamScheduleDetail = () => {
         >
           <View className="px-6 mt-4 flex-row justify-between items-center z-50">
             <View className="flex-row items-center">
-              <Text className="text-gray-900 font-bold text-lg">Ca thi</Text>
-              <View className="bg-gray-200 px-2 py-0.5 rounded-full ml-2">
-                <Text className="text-gray-600 text-[10px] font-bold">{data?.totalCount || 0}</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-900 text-lg">Ca thi</Text>
+              <View className="bg-blue-50 px-3 py-0.5 rounded-full ml-2">
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-[11px]">{data?.totalCount || 0}</Text>
               </View>
             </View>
 
@@ -232,9 +251,11 @@ const ExamScheduleDetail = () => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" />
           }
           ListEmptyComponent={
-            <View className="items-center justify-center py-20 bg-white rounded-2xl mx-6 mt-4 border border-dashed border-gray-200">
-              <Ionicons name="grid-outline" size={48} color="#E5E7EB" />
-              <Text className="text-gray-400 mt-4 text-center px-6">
+            <View className="items-center justify-center py-20 bg-white rounded-3xl mt-4 border border-dashed border-gray-200">
+              <View className="w-20 h-20 rounded-full bg-blue-50 items-center justify-center">
+                <Ionicons name="grid-outline" size={36} color="#136ADA" />
+              </View>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-6 text-xs">
                 Lịch thi này chưa có ca thi nào được thiết lập.{"\n"}Vui lòng nhập dữ liệu từ file Excel mẫu.
               </Text>
             </View>

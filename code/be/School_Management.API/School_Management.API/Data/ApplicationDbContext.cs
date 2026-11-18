@@ -17,6 +17,8 @@ namespace School_Management.API.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Teacher> Teacher { get; set; }
         public DbSet<Student> Student { get; set; }
+        public DbSet<Parent> Parent { get; set; }
+        public DbSet<ParentStudent> ParentStudent { get; set; }
         public DbSet<ClassYear> ClassYear { get; set; }
         public DbSet<StudentClassYear> StudentClassYear { get; set; }
         public DbSet<TeacherSubject> TeacherSubject { get; set; }
@@ -59,6 +61,7 @@ namespace School_Management.API.Data
             Guid adminId = new Guid("ef18be90-de43-45db-9c63-8778ff21e786");
             Guid teacherId = new Guid ("ddfd9f1c-e824-4dd3-9859-5e12d419145f");
             Guid studentId = new Guid ("88ad671c-a2bc-4d35-85c6-02f42bfb3a0c");
+            Guid parentId = new Guid("5c1f7a3e-9b24-4d86-8a51-3e7d2c9f4b10");
 
             var roles = new List<IdentityRole<Guid>>
             {
@@ -84,6 +87,14 @@ namespace School_Management.API.Data
                     ConcurrencyStamp = studentId.ToString(),
                     Name = "Student",
                     NormalizedName = "Student".ToUpper()
+                },
+
+                new IdentityRole<Guid>
+                {
+                    Id = parentId,
+                    ConcurrencyStamp = parentId.ToString(),
+                    Name = "Parent",
+                    NormalizedName = "Parent".ToUpper()
                 }
             };
 

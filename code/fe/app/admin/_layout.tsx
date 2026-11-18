@@ -1,4 +1,5 @@
 import { Stack, Redirect } from "expo-router";
+import { RoleTabsFrame } from "../../components/RoleTabBar";
 import { useAuthStore } from "../../store/authStore";
 
 export default function AdminLayout() {
@@ -16,15 +17,17 @@ export default function AdminLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" options={{ title: "Bảng điều khiển Admin" }} />
-      <Stack.Screen name="users/index" options={{ title: "Quản lý người dùng" }} />
+    <RoleTabsFrame role="admin">
+      <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" options={{ animation: "none", title: "Bảng điều khiển Admin" }} />
+      <Stack.Screen name="users/index" options={{ animation: "none", title: "Quản lý người dùng" }} />
       <Stack.Screen name="users/create" options={{ title: "Tạo người dùng mới" }} />
       <Stack.Screen name="users/[id]" options={{ title: "Chi tiết người dùng" }} />
-      <Stack.Screen name="profile" options={{ title: "Hồ sơ cá nhân" }} />
+      <Stack.Screen name="profile" options={{ animation: "none", title: "Hồ sơ cá nhân" }} />
       <Stack.Screen name="students/index" options={{ title: "Danh sách học sinh" }} />
       <Stack.Screen name="students/[id]" options={{ title: "Chi tiết học sinh" }} />
       <Stack.Screen name="teachers/index" options={{ title: "Danh sách giáo viên" }} />
+      <Stack.Screen name="parents/index" options={{ title: "Quản lý phụ huynh" }} />
       <Stack.Screen name="teachers/[id]" options={{ title: "Chi tiết giáo viên" }} />
       <Stack.Screen name="class-years/index" options={{ title: "Quản lý lớp học" }} />
       <Stack.Screen name="class-years/create" options={{ title: "Mở lớp học mới" }} />
@@ -40,14 +43,16 @@ export default function AdminLayout() {
       <Stack.Screen name="exam-schedules/index" options={{ title: "Quản lý lịch thi" }} />
       <Stack.Screen name="exam-schedules/create" options={{ title: "Tạo lịch thi" }} />
       <Stack.Screen name="exam-schedules/[id]" options={{ title: "Chi tiết lịch thi" }} />
-      <Stack.Screen name="fees/index" options={{ title: "Quản lý học phí" }} />
+      <Stack.Screen name="fees/index" options={{ animation: "none", title: "Quản lý học phí" }} />
       <Stack.Screen name="fees/[id]" options={{ title: "Chi tiết học phí" }} />
       <Stack.Screen name="courses/index" options={{ title: "Quản lý khóa học" }} />
       <Stack.Screen name="courses/lessons" options={{ title: "Bài giảng khóa học" }} />
       <Stack.Screen name="events/index" options={{ title: "Quản lý sự kiện" }} />
       <Stack.Screen name="events/create" options={{ title: "Tạo sự kiện mới" }} />
       <Stack.Screen name="payments/index" options={{ title: "Lịch sử thanh toán" }} />
+      <Stack.Screen name="chat/index" options={{ animation: "none", title: "Tin nhắn" }} />
       <Stack.Screen name="ai-chat" options={{ title: "Trò chuyện AI" }} />
     </Stack>
+    </RoleTabsFrame>
   );
 }

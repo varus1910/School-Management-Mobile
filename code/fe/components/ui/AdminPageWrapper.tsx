@@ -1,13 +1,14 @@
+import { goBack } from "../../utils/navigation";
 import React from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
-  SafeAreaView,
   StyleProp,
   ViewStyle,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { AppLogo } from "./AppLogo";
@@ -52,7 +53,7 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
             <View>{leftComponent}</View>
           ) : (
             <TouchableOpacity
-              onPress={onBack || (() => router.back())}
+              onPress={onBack || goBack}
               className="p-1"
             >
               <Ionicons name="arrow-back" size={24} color="black" />

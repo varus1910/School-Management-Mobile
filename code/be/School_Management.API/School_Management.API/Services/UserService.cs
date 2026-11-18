@@ -437,7 +437,8 @@ namespace School_Management.API.Services
                     UserName = createUserRequest.Username?.Trim(),
                     Address = createUserRequest.Address?.Trim(),
                     PhoneNumber = createUserRequest.PhoneNumber,
-                    Birthday = birthday1,
+                    // Npgsql chỉ nhận DateTimeOffset có offset 0 (UTC); DateTime Unspecified sẽ bị đổi sang giờ máy (+07) nên phải chỉ rõ UTC.
+                    Birthday = new DateTimeOffset(DateTime.SpecifyKind(birthday1, DateTimeKind.Utc)),
                     FullName = createUserRequest.FullName?.Trim(),
                     Email = createUserRequest.Email,
                     AvatarUrl = avatarUrl ?? "",
@@ -512,6 +513,32 @@ namespace School_Management.API.Services
                 }
 
 
+
+                if (createUserRequest.Role.Equals("Parent", StringComparison.OrdinalIgnoreCase))
+                {
+                    var parent = new Parent
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id
+                    };
+                    await context.Parent.AddAsync(parent);
+
+                    var studentIds = createUserRequest.StudentIds?.Distinct().ToList();
+                    if (studentIds != null && studentIds.Count > 0)
+                    {
+                        var existedCount = await context.Student.AsNoTracking().CountAsync(x => studentIds.Contains(x.Id));
+                        if (existedCount != studentIds.Count) throw new NotFoundException("Có học sinh không tồn tại");
+
+                        var parentStudents = studentIds.Select(studentId => new ParentStudent
+                        {
+                            ParentStudentId = Guid.NewGuid(),
+                            ParentId = parent.Id,
+                            StudentId = studentId,
+                            Relationship = createUserRequest.Relationship?.Trim()
+                        });
+                        await context.ParentStudent.AddRangeAsync(parentStudents);
+                    }
+                }
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();

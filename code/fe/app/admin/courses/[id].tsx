@@ -20,6 +20,7 @@ import { lessonService } from "../../../services/lesson.service";
 import { CourseResponse } from "../../../types/course";
 import { LessonResponse } from "../../../types/lesson";
 import { StatusBar } from "expo-status-bar";
+import { coverColorFor } from "../../../utils/coverColor";
 
 export default function AdminCourseDetailScreen() {
   const router = useRouter();
@@ -106,78 +107,74 @@ export default function AdminCourseDetailScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" />}
       >
-        {/* Course Info Card */}
-        <View className="px-6 pt-6">
-          <View className="bg-blue-50/50 p-6 rounded-[40px] border border-blue-100/50">
-            <View className="flex-row items-center gap-2 mb-4">
-               <View className="bg-blue-100 flex-row items-center px-3 py-1 rounded-full border border-blue-200">
-                  <Ionicons name="journal" size={12} color="#136ADA" />
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-[10px] ml-1 uppercase">
-                    {course.subjectName}
-                  </Text>
-               </View>
-               {course.status.toLowerCase() === "approved" ? (
-                 <View className="bg-green-100 px-3 py-1 rounded-full border border-green-200">
-                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-green-600 text-[10px]">
-                      ĐÃ DUYỆT
-                    </Text>
-                 </View>
-               ) : course.status.toLowerCase() === "pending" ? (
-                 <View className="bg-orange-100 px-3 py-1 rounded-full border border-orange-200">
-                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-orange-600 text-[10px]">
-                      CHỜ DUYỆT
-                    </Text>
-                 </View>
-               ) : (
-                 <View className="bg-red-100 px-3 py-1 rounded-full border border-red-200">
-                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-red-600 text-[10px]">
-                      TỪ CHỐI
-                    </Text>
-                 </View>
-               )}
+        {/* Ảnh bìa + thông tin chính */}
+        <View
+          className="px-6 pt-6 pb-16 rounded-b-[36px] overflow-hidden"
+          style={{ backgroundColor: coverColorFor(course.subjectName || course.courseName) }}
+        >
+          <View className="absolute" style={{ right: -14, top: 8, opacity: 0.15 }}>
+            <Ionicons name="journal" size={150} color="white" />
+          </View>
+          <View className="flex-row items-center gap-2 mb-4">
+            <View className="bg-white/25 flex-row items-center px-3 py-1 rounded-full">
+              <Ionicons name="journal" size={12} color="white" />
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-[10px] ml-1 uppercase">
+                {course.subjectName}
+              </Text>
             </View>
+            <View
+              className={`px-3 py-1 rounded-full ${course.status.toLowerCase() === "approved" ? "bg-green-100" : course.status.toLowerCase() === "pending" ? "bg-orange-100" : "bg-red-100"}`}
+            >
+              <Text
+                style={{ fontFamily: "Poppins-Bold" }}
+                className={`text-[10px] ${course.status.toLowerCase() === "approved" ? "text-green-600" : course.status.toLowerCase() === "pending" ? "text-orange-600" : "text-red-600"}`}
+              >
+                {course.status.toLowerCase() === "approved" ? "ĐÃ DUYỆT" : course.status.toLowerCase() === "pending" ? "CHỜ DUYỆT" : "TỪ CHỐI"}
+              </Text>
+            </View>
+          </View>
 
-            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-2xl text-black mb-4">
-              {course.courseName}
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-2xl text-white mb-4">
+            {course.courseName}
+          </Text>
+
+          <View className="flex-row items-center gap-3">
+            <View className="w-10 h-10 rounded-full bg-white/25 items-center justify-center">
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white">
+                {course.teacherName.charAt(0)}
+              </Text>
+            </View>
+            <View>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-sm">
+                {course.teacherName}
+              </Text>
+              <Text style={{ fontFamily: "Poppins-Regular" }} className="text-white/70 text-[10px]">
+                Giáo viên hướng dẫn
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Hai ô số liệu nổi lên */}
+        <View className="px-6 -mt-10 flex-row gap-3">
+          <View className="flex-1 bg-white rounded-3xl p-4 border border-gray-100 shadow-sm">
+            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">HỌC PHÍ</Text>
+            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xl">
+              {course.price.toLocaleString("vi-VN")}đ
             </Text>
-
-            <View className="flex-row items-center gap-3">
-               <View className="w-10 h-10 rounded-full bg-indigo-100 items-center justify-center border border-indigo-200">
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600">
-                    {course.teacherName.charAt(0)}
-                  </Text>
-               </View>
-               <View>
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-sm">
-                    {course.teacherName}
-                  </Text>
-                  <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">
-                    Giáo viên hướng dẫn
-                  </Text>
-               </View>
-            </View>
-
-            <View className="mt-6 pt-6 border-t border-blue-100/50 flex-row justify-between items-center">
-               <View>
-                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">HỌC PHÍ</Text>
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xl">
-                    {course.price.toLocaleString("vi-VN")}đ
-                  </Text>
-               </View>
-               <View className="items-end">
-                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">BÀI HỌC</Text>
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-700 text-xl">
-                    {lessons.length}
-                  </Text>
-               </View>
-            </View>
+          </View>
+          <View className="flex-1 bg-white rounded-3xl p-4 border border-gray-100 shadow-sm">
+            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">BÀI HỌC</Text>
+            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-xl">
+              {lessons.length}
+            </Text>
           </View>
         </View>
 
         {/* Description Section */}
         <View className="px-6 mt-8">
            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg text-black mb-4">Mô tả khóa học</Text>
-           <View className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+           <View className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
               <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-600 leading-6 text-sm">
                 {course.description || "Không có mô tả chi tiết."}
               </Text>

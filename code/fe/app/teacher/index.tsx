@@ -1,117 +1,75 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  RefreshControl,
-  FlatList,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { useConfigStore } from "../../store/configStore";
 import SideMenu from "@/components/SideMenu";
 import { classYearService } from "../../services/classYear.service";
 import { attendanceService } from "../../services/attendance.service";
 import { scheduleService } from "../../services/schedule.service";
+import { TeacherScheduleDetailItem } from "../../types/schedule";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
+import {
+  EmptyLine,
+  FloatingBody,
+  HeroChip,
+  HeroProfileCard,
+  HomeHero,
+  LessonTimeline,
+  ListRow,
+  PRIMARY,
+  SectionCard,
+  ShortcutGrid,
+  ShortcutItem,
+  StatTile,
+  greeting,
+  toMinutes,
+} from "../../components/home/HomeParts";
 
-const TeachingClassCard = memo(
-  ({ item, onPress }: { item: any; onPress: () => void }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      className="bg-[#136ADA] w-64 p-6 rounded-[32px] shadow-lg shadow-blue-100"
-    >
-      <View className="flex-row justify-between items-start mb-6">
-        <View className="flex-row items-center gap-3">
-          <View className="bg-white/20 p-2 rounded-xl">
-            <Ionicons name="school-outline" size={22} color="white" />
-          </View>
-          <View>
-            <Text
-              className="text-white text-lg"
-              style={{ fontFamily: "Poppins-Bold" }}
-            >
-              {item.className}
-            </Text>
-            <Text
-              className="text-white/80 text-[10px]"
-              style={{ fontFamily: "Poppins-Medium" }}
-            >
-              {item.subjectName} • Khối {item.grade}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <View className="flex-row items-center justify-between mt-2">
-        <View className="flex-row items-center gap-1">
-          <Ionicons name="people-outline" size={14} color="white" />
-          <Text
-            className="text-white text-xs"
-            style={{ fontFamily: "Poppins-Bold" }}
-          >
-            {item.studentCount || "40"}
-          </Text>
-          <Text
-            className="text-white/70 text-[10px] ml-0.5"
-            style={{ fontFamily: "Poppins-Regular" }}
-          >
-            Học sinh
-          </Text>
-        </View>
-        <View className="bg-white/20 px-3 py-1.5 rounded-xl">
-          <Ionicons name="arrow-forward" size={16} color="white" />
-        </View>
-      </View>
-    </TouchableOpacity>
-  ),
-);
+const SHORTCUTS: ShortcutItem[] = [
+  { icon: "calendar", label: "Lịch dạy", route: "/teacher/schedules", color: "#14B8A6", bg: "bg-teal-50" },
+  { icon: "library", label: "Khóa học", route: "/teacher/courses", color: "#F97316", bg: "bg-orange-50" },
+  { icon: "time", label: "Lịch thi", route: "/teacher/exam-schedules", color: "#F43F5E", bg: "bg-rose-50" },
+  { icon: "megaphone", label: "Sự kiện", route: "/teacher/events", color: "#D97706", bg: "bg-amber-50" },
+  { icon: "people", label: "Đồng nghiệp", route: "/teacher/community/teachers", color: "#6366F1", bg: "bg-indigo-50" },
+  { icon: "sparkles", label: "AI Chat", route: "/teacher/ai-chat", color: "#8B5CF6", bg: "bg-violet-50" },
+  { icon: "chatbubbles", label: "Tin nhắn", route: "/teacher/chat", color: "#06B6D4", bg: "bg-cyan-50" },
+];
 
 export default function TeacherDashboard() {
   const { userInfo } = useAuthStore();
   const { schoolYear, term } = useConfigStore();
-  const teacherName = userInfo?.fullName?.split(" ").at(-1) ?? "Giáo viên";
 
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [homeroomClass, setHomeroomClass] = useState<any>(null);
-  const [loadingHomeroom, setLoadingHomeroom] = useState(true);
   const [teachingClasses, setTeachingClasses] = useState<any[]>([]);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [attendanceStats, setAttendanceStats] = useState({
-    present: 0,
-    absent: 0,
-    late: 0,
-    rate: 0,
-    total: 0,
-  });
-  const [loadingAttendance, setLoadingAttendance] = useState(false);
+  const [todayLessons, setTodayLessons] = useState<TeacherScheduleDetailItem[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [attendanceStats, setAttendanceStats] = useState<{
+    present: number;
+    absent: number;
+    late: number;
+    rate: number;
+    total: number;
+  } | null>(null);
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      setLoadingHomeroom(true);
-      setLoadingStats(true);
+      setLoading(true);
       const [hrRes, tcRes, schRes] = await Promise.all([
         classYearService.getHomeroomClass(schoolYear).catch(() => null),
-        classYearService.getTeachingClasses({
-          schoolYear: schoolYear.toString(),
-        }).catch(() => []),
+        classYearService.getTeachingClasses({ schoolYear: schoolYear.toString() }).catch(() => []),
         scheduleService
-          .getMyTeachingSchedule({
-            Term: term,
-            SchoolYear: schoolYear,
-          })
-          .catch(() => []),
+          .getMyTeachingSchedule({ Term: term, SchoolYear: schoolYear })
+          .catch(() => null),
       ]);
 
       // Map subjects from schedule to teaching classes
+      const schedule = schRes ?? [];
       const mappedTeaching = tcRes.map((cls: any) => {
-        const match = schRes.find((s: any) => s.className === cls.className);
+        const match = schedule.find((s: any) => s.className === cls.className);
         return {
           ...cls,
           subjectId: match?.subjectId || cls.subjectId || "",
@@ -122,18 +80,44 @@ export default function TeacherDashboard() {
       // Filter out duplicate classYearId-subjectId pairs if any
       const uniqueTeaching = mappedTeaching.filter(
         (v: any, i: number, a: any[]) =>
-          a.findIndex(
-            (t) =>
-              t.classYearId === v.classYearId && t.subjectId === v.subjectId,
-          ) === i,
+          a.findIndex((t) => t.classYearId === v.classYearId && t.subjectId === v.subjectId) === i,
       );
       setHomeroomClass(hrRes);
       setTeachingClasses(uniqueTeaching);
+
+      const now = new Date();
+      const todayDow = now.getDay() === 0 ? 7 : now.getDay(); // 1=T2 ... 7=CN
+      setTodayLessons(
+        schRes === null
+          ? null
+          : schRes
+              .filter((s) => s.dayOfWeek === todayDow)
+              .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime)),
+      );
+
+      if (hrRes?.classYearId) {
+        const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        try {
+          const data = await attendanceService.getClassAttendance({
+            classYearId: hrRes.classYearId,
+            date: localToday,
+          });
+          const present = data.filter((i) => i.status === "present" || i.status === "Có mặt").length;
+          const absent = data.filter((i) => i.status === "absent" || i.status === "Vắng mặt").length;
+          const late = data.filter((i) => i.status === "late" || i.status === "Đi trễ").length;
+          const total = data.length;
+          setAttendanceStats({ present, absent, late, total, rate: total > 0 ? Math.round((present / total) * 100) : 0 });
+        } catch (err) {
+          console.log("Error fetching attendance stats:", err);
+          setAttendanceStats(null);
+        }
+      } else {
+        setAttendanceStats(null);
+      }
     } catch (err) {
       console.log("Error fetching teacher dashboard data:", err);
     } finally {
-      setLoadingHomeroom(false);
-      setLoadingStats(false);
+      setLoading(false);
     }
   }, [schoolYear, term]);
 
@@ -143,44 +127,9 @@ export default function TeacherDashboard() {
     }, [fetchDashboardData]),
   );
 
-  const fetchAttendanceStats = useCallback(async (classYearId: string) => {
-    try {
-      setLoadingAttendance(true);
-      const now = new Date();
-      const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
-      const data = await attendanceService.getClassAttendance({
-        classYearId,
-        date: localToday,
-      });
-
-      const present = data.filter(
-        (i) => i.status === "present" || i.status === "Có mặt",
-      ).length;
-      const absent = data.filter(
-        (i) => i.status === "absent" || i.status === "Vắng mặt",
-      ).length;
-      const late = data.filter(
-        (i) => i.status === "late" || i.status === "Đi trễ",
-      ).length;
-      const total = data.length;
-      const rate = total > 0 ? Math.round((present / total) * 100) : 0;
-
-      setAttendanceStats({ present, absent, late, rate, total });
-    } catch (err) {
-      console.log("Error fetching attendance stats:", err);
-    } finally {
-      setLoadingAttendance(false);
-    }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (homeroomClass?.classYearId) {
-        fetchAttendanceStats(homeroomClass.classYearId);
-      }
-    }, [homeroomClass, fetchAttendanceStats]),
-  );
+  const lessonCount = todayLessons?.length ?? 0;
+  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  const nextLesson = todayLessons?.find((l) => toMinutes(l.finishTime) > nowMin);
 
   return (
     <AdminPageWrapper
@@ -191,330 +140,159 @@ export default function TeacherDashboard() {
         </TouchableOpacity>
       }
       rightComponent={
-        <TouchableOpacity
-          onPress={() => router.push("/teacher/notifications" as any)}
-        >
+        <TouchableOpacity onPress={() => router.push("/teacher/notifications" as any)}>
           <Ionicons name="notifications-outline" size={28} color="black" />
         </TouchableOpacity>
       }
     >
       <StatusBar hidden />
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Welcome Greeting */}
-        <View className="px-6 mt-6 mb-2">
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-black text-xl"
-          >
-            Chào mừng bạn, {teacherName} 👋
-          </Text>
-          <Text
-            style={{ fontFamily: "Poppins-Regular" }}
-            className="text-gray-400 text-xs"
-          >
-            Hôm nay bạn có 4 tiết dạy.
-          </Text>
-        </View>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchDashboardData} />}
+      >
+        <HomeHero
+          eyebrow={`${greeting()} 👋`}
+          right={<HeroChip icon="calendar" label={`Năm học ${schoolYear} • HK${term}`} />}
+        >
+          <HeroProfileCard
+            name={userInfo?.fullName ?? "Giáo viên"}
+            avatarUrl={userInfo?.avatarUrl}
+            label="Giáo viên"
+            subtitle={homeroomClass ? `Chủ nhiệm lớp ${homeroomClass.className}` : "Giáo viên bộ môn"}
+          />
+        </HomeHero>
 
-        {/* Homeroom Management Section (Featured) */}
-        {homeroomClass && (
-          <View className="px-6 mb-8 mt-4">
-            <Text
-              style={{ fontFamily: "Poppins-SemiBold" }}
-              className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
-            >
-              Quản lý Chủ nhiệm
-            </Text>
-            <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[220px] relative">
-              {/* Background decoration */}
-              <View
-                className="absolute right-[-20] top-10 w-40 h-40 bg-blue-500/5 rounded-full"
-                style={{ transform: [{ scale: 1.2 }] }}
-              />
-
-              <View className="z-10 flex-1 justify-between">
-                <View>
-                  <Text
-                    className="text-[#136ADA] text-sm mb-1"
-                    style={{ fontFamily: "Poppins-Bold" }}
-                  >
-                    Năm học {schoolYear}
-                  </Text>
-
-                  <Text
-                    className="text-[#136ADA] leading-tight"
-                    style={{
-                      fontFamily: "Poppins-Bold",
-                      fontSize: 38,
-                      maxWidth: "80%",
-                    }}
-                  >
-                    Lớp {homeroomClass.className}
-                  </Text>
-                  <Text
-                    style={{ fontFamily: "Poppins-Medium" }}
-                    className="text-gray-400 text-xs mt-1"
-                  >
-                    Bạn đang là Giáo viên chủ nhiệm
-                  </Text>
-                </View>
-
-                <View className="flex-row items-center gap-2 mt-6">
-                  <TouchableOpacity
-                    onPress={() => router.push("/teacher/my-homeroom-class")}
-                    className="bg-[#136ADA] px-6 py-3 rounded-2xl shadow-md shadow-blue-200"
-                  >
-                    <Text
-                      style={{ fontFamily: "Poppins-Bold" }}
-                      className="text-white text-xs"
-                    >
-                      Vào lớp học
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Decorative icon */}
-              <View className="absolute right-4 bottom-4 opacity-10">
-                <Ionicons name="star" size={100} color="#136ADA" />
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Teaching Classes Horizontal Section */}
-        <View className="mb-8 mt-2">
-          <View className="flex-row justify-between items-center px-6 mb-4">
-            <Text
-              style={{ fontFamily: "Poppins-SemiBold" }}
-              className="text-gray-500 text-xs mb-0 uppercase tracking-widest"
-            >
-              Lớp học giảng dạy
-            </Text>
-            <TouchableOpacity onPress={() => router.push("/teacher/my-class")}>
-              <Text
-                className="text-[#136ADA] text-sm"
-                style={{ fontFamily: "Poppins-Medium" }}
-              >
-                Tất cả
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <FlatList
-            data={teachingClasses}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            initialNumToRender={5}
-            maxToRenderPerBatch={5}
-            windowSize={3}
-            removeClippedSubviews={true}
-            contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
-            renderItem={({ item }) => (
-              <TeachingClassCard
-                item={item}
-                onPress={() =>
-                  router.push({
-                    pathname: `/teacher/my-class/${item.classYearId}`,
-                    params: {
-                      subjectId: item.subjectId,
-                      subjectName: item.subjectName,
-                    },
-                  } as any)
+        <FloatingBody>
+          <View className="flex-row gap-3">
+            <StatTile
+              icon="time"
+              label="Tiết dạy hôm nay"
+              onPress={() => router.push("/teacher/schedules" as any)}
+              loading={loading && todayLessons === null}
+              value={todayLessons === null ? "—" : String(lessonCount)}
+              sub={
+                todayLessons === null
+                  ? "Chưa có dữ liệu"
+                  : nextLesson
+                    ? `Tiếp theo: ${nextLesson.startTime.slice(0, 5)} • ${nextLesson.className}`
+                    : lessonCount === 0
+                      ? "Không có tiết nào"
+                      : "Đã dạy xong hôm nay"
+              }
+              tone={todayLessons === null ? "neutral" : "info"}
+            />
+            {homeroomClass ? (
+              <StatTile
+                icon="people"
+                label={`Điểm danh lớp ${homeroomClass.className}`}
+                onPress={() => router.push("/teacher/my-homeroom-class" as any)}
+                loading={loading && !attendanceStats}
+                value={attendanceStats && attendanceStats.total > 0 ? `${attendanceStats.rate}%` : "—"}
+                sub={
+                  attendanceStats && attendanceStats.total > 0
+                    ? `${attendanceStats.present} có mặt • ${attendanceStats.absent} vắng • ${attendanceStats.late} trễ`
+                    : "Hôm nay chưa điểm danh"
+                }
+                tone={
+                  !attendanceStats || attendanceStats.total === 0
+                    ? "neutral"
+                    : attendanceStats.rate >= 90
+                      ? "good"
+                      : "warn"
                 }
               />
+            ) : (
+              <StatTile
+                icon="school"
+                label="Lớp giảng dạy"
+                onPress={() => router.push("/teacher/my-class" as any)}
+                loading={loading}
+                value={String(teachingClasses.length)}
+                sub={`Năm học ${schoolYear}`}
+                tone="info"
+              />
             )}
-            keyExtractor={(item, index) =>
-              `${item.classYearId}-${item.subjectId || index}`
-            }
-            ListEmptyComponent={() => (
-              <View className="w-64 bg-gray-50 border border-gray-100 p-5 rounded-[32px] items-center justify-center">
-                <Ionicons name="school-outline" size={32} color="#CCC" />
-                <Text
-                  className="text-gray-400 mt-2 text-xs"
-                  style={{ fontFamily: "Poppins-Medium" }}
-                >
-                  Chưa có lớp giảng dạy
+          </View>
+
+          {/* Lịch dạy hôm nay */}
+          <SectionCard title="Lịch dạy hôm nay" actionLabel="Cả tuần" onAction={() => router.push("/teacher/schedules" as any)}>
+            {loading && todayLessons === null ? (
+              <ActivityIndicator color={PRIMARY} />
+            ) : todayLessons === null ? (
+              <EmptyLine text="Không tải được lịch dạy." />
+            ) : todayLessons.length === 0 ? (
+              <EmptyLine text="Hôm nay bạn không có tiết dạy nào." />
+            ) : (
+              <LessonTimeline
+                lessons={todayLessons.map((l) => ({
+                  id: l.scheduleDetailId,
+                  subjectName: l.subjectName,
+                  startTime: l.startTime,
+                  finishTime: l.finishTime,
+                  timeRange: l.timeRange,
+                  extra: [`Lớp ${l.className}`, l.roomName].filter(Boolean).join(" • "),
+                }))}
+              />
+            )}
+          </SectionCard>
+
+          {/* Lớp chủ nhiệm */}
+          {homeroomClass && (
+            <TouchableOpacity
+              onPress={() => router.push("/teacher/my-homeroom-class")}
+              className="mt-4 bg-blue-50 rounded-3xl p-5 flex-row items-center"
+            >
+              <View className="w-12 h-12 rounded-2xl bg-white items-center justify-center">
+                <Ionicons name="star" size={22} color={PRIMARY} />
+              </View>
+              <View className="ml-4 flex-1">
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-[#136ADA] text-[10px] uppercase tracking-widest">
+                  Lớp chủ nhiệm • Năm học {schoolYear}
+                </Text>
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-base">
+                  Lớp {homeroomClass.className}
+                </Text>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs">
+                  Bạn đang là giáo viên chủ nhiệm
                 </Text>
               </View>
+              <Ionicons name="chevron-forward" size={18} color={PRIMARY} />
+            </TouchableOpacity>
+          )}
+
+          {/* Lớp giảng dạy */}
+          <SectionCard title="Lớp giảng dạy" actionLabel="Tất cả" onAction={() => router.push("/teacher/my-class")}>
+            {loading && teachingClasses.length === 0 ? (
+              <ActivityIndicator color={PRIMARY} />
+            ) : teachingClasses.length === 0 ? (
+              <EmptyLine text="Chưa có lớp giảng dạy." />
+            ) : (
+              teachingClasses.slice(0, 4).map((item, i, arr) => (
+                <ListRow
+                  key={`${item.classYearId}-${item.subjectId || i}`}
+                  icon="school-outline"
+                  iconColor={PRIMARY}
+                  iconBg="bg-blue-50"
+                  title={`Lớp ${item.className}`}
+                  subtitle={`${item.subjectName} • Khối ${item.grade}${item.studentCount ? ` • ${item.studentCount} học sinh` : ""}`}
+                  last={i === arr.length - 1}
+                  onPress={() =>
+                    router.push({
+                      pathname: `/teacher/my-class/${item.classYearId}`,
+                      params: { subjectId: item.subjectId, subjectName: item.subjectName },
+                    } as any)
+                  }
+                />
+              ))
             )}
-          />
-        </View>
+          </SectionCard>
+        </FloatingBody>
 
-        {/* Teaching Activities Section (Service Grid) */}
-        <View className="px-6 mb-8 mt-2">
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
-          >
-            Tiện ích Nghiệp vụ
-          </Text>
-          <View className="flex-row flex-wrap justify-between gap-y-4">
-            <TeachingCard
-              icon="calendar"
-              label="Lịch dạy"
-              route="/teacher/schedules"
-              color="bg-teal-100"
-              iconColor="#14B8A6"
-            />
-            <TeachingCard
-              icon="library"
-              label="Khóa học"
-              route="/teacher/courses"
-              color="bg-orange-100"
-              iconColor="#F97316"
-            />
-            <TeachingCard
-              icon="time"
-              label="Lịch thi"
-              route="/teacher/exam-schedules"
-              color="bg-rose-100"
-              iconColor="#F43F5E"
-            />
-            <TeachingCard
-              icon="megaphone"
-              label="Sự kiện"
-              route="/teacher/events"
-              color="bg-amber-100"
-              iconColor="#D97706"
-            />
-            <TeachingCard
-              icon="people"
-              label="Đồng nghiệp"
-              route="/teacher/community/teachers"
-              color="bg-indigo-100"
-              iconColor="#6366F1"
-            />
-            <TeachingCard
-              icon="sparkles"
-              label="AI Chat"
-              route="/teacher/ai-chat"
-              color="bg-violet-100"
-              iconColor="#8B5CF6"
-            />
-            <TeachingCard
-              icon="chatbubbles"
-              label="Tin nhắn"
-              route="/teacher/chat"
-              color="bg-cyan-100"
-              iconColor="#06B6D4"
-            />
-          </View>
-        </View>
-
-        {/* Bottom Banner Redesigned */}
-        <View className="px-6 pb-12 mt-2">
-          <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[160px] relative">
-            <View
-              className="absolute right-[-10] top-5 w-32 h-32 bg-teal-500/5 rounded-full"
-              style={{ transform: [{ scale: 1.5 }] }}
-            />
-
-            <View className="z-10 flex-1 justify-between">
-              <View>
-                <Text
-                  className="text-[#14B8A6] text-sm mb-1"
-                  style={{ fontFamily: "Poppins-Bold" }}
-                >
-                  Thông báo mới
-                </Text>
-                <Text
-                  className="text-gray-800 leading-snug"
-                  style={{ fontFamily: "Poppins-SemiBold", fontSize: 18 }}
-                  numberOfLines={2}
-                >
-                  Kiểm tra các bài nộp còn thiếu từ học sinh trong tuần này.
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => router.push("/teacher/notifications" as any)}
-                className="bg-teal-50 self-start px-5 py-2 rounded-xl mt-4"
-              >
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-[#14B8A6] text-[10px] uppercase tracking-widest"
-                >
-                  Kiểm tra ngay
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View className="absolute right-4 bottom-4 opacity-10">
-              <Ionicons name="notifications" size={60} color="#14B8A6" />
-            </View>
-          </View>
-        </View>
+        <ShortcutGrid title="Tiện ích nghiệp vụ" items={SHORTCUTS} />
       </ScrollView>
       <SideMenu visible={isMenuVisible} onClose={() => setMenuVisible(false)} />
     </AdminPageWrapper>
-  );
-}
-// --- Helper Components ---
-
-function HomeroomAction({
-  icon,
-  label,
-  route,
-  disabled,
-  loading,
-}: {
-  icon: string;
-  label: string;
-  route: string;
-  disabled?: boolean;
-  loading?: boolean;
-}) {
-  return (
-    <TouchableOpacity
-      onPress={() => !disabled && !loading && router.push(route as any)}
-      className={`items-center gap-1.5 ${disabled ? "opacity-30" : ""}`}
-    >
-      <View className="w-10 h-10 bg-white/20 rounded-2xl items-center justify-center">
-        {loading ? (
-          <ActivityIndicator size="small" color="white" />
-        ) : (
-          <Ionicons name={icon as any} size={16} color="white" />
-        )}
-      </View>
-      <Text
-        style={{ fontFamily: "Poppins-SemiBold" }}
-        className="text-white text-[9px]"
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-function TeachingCard({
-  icon,
-  label,
-  route,
-  color,
-  iconColor,
-}: {
-  icon: string;
-  label: string;
-  route: string;
-  color: string;
-  iconColor: string;
-}) {
-  return (
-    <TouchableOpacity
-      onPress={() => router.push(route as any)}
-      className={`${color} w-[31%] py-6 rounded-2xl items-center justify-center gap-2`}
-    >
-      <View className="w-10 h-10 bg-white/50 rounded-full items-center justify-center">
-        <Ionicons name={icon as any} size={20} color={iconColor} />
-      </View>
-      <Text
-        style={{ fontFamily: "Poppins-Medium" }}
-        className="text-black text-xs text-center"
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
   );
 }

@@ -23,10 +23,12 @@ import { userService } from "../../../services/user.service";
 import { roleService } from "../../../services/role.service";
 import { classYearService } from "../../../services/classYear.service";
 import { subjectService } from "../../../services/subject.service";
+import { studentService } from "../../../services/student.service";
 import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { RoleResponse } from "../../../types/role";
 import { ClassYearResponse } from "../../../types/classYear";
 import { SubjectResponse } from "../../../types/subject";
+import { StudentListItem } from "../../../types/student";
 import { getErrorMessage } from "../../../utils/error";
 
 const FormLabel = ({ children }: { children: string }) => (
@@ -93,6 +95,13 @@ export default function AdminCreateUserScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
+  // Parent: chọn con để gắn cho phụ huynh
+  const [selectedChildren, setSelectedChildren] = useState<StudentListItem[]>([]);
+  const [childQuery, setChildQuery] = useState("");
+  const [childResults, setChildResults] = useState<StudentListItem[]>([]);
+  const [searchingChild, setSearchingChild] = useState(false);
+  const [relationship, setRelationship] = useState("");
+
   const [roles, setRoles] = useState<RoleResponse[]>([]);
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
@@ -140,6 +149,10 @@ export default function AdminCreateUserScreen() {
   const set = (key: string, val: string) => {
     if (key === "roleId") {
       setSelectedGrade(null);
+      setSelectedChildren([]);
+      setChildQuery("");
+      setChildResults([]);
+      setRelationship("");
       setForm((f) => ({ ...f, roleId: val, classYearId: "", subjectId: "" }));
     } else {
       setForm((f) => ({ ...f, [key]: val }));
@@ -148,6 +161,41 @@ export default function AdminCreateUserScreen() {
 
   const isStudent = form.roleId.toLowerCase() === "student";
   const isTeacher = form.roleId.toLowerCase() === "teacher";
+  const isParent = form.roleId.toLowerCase() === "parent";
+
+  const searchChildren = async () => {
+    const q = childQuery.trim();
+    if (!q) {
+      setChildResults([]);
+      return;
+    }
+    try {
+      setSearchingChild(true);
+      const res = await studentService.getStudents({
+        FullName: q,
+        PageNumber: 1,
+        PageSize: 10,
+      });
+      setChildResults(
+        (res.items || []).filter(
+          (st) => !selectedChildren.some((c) => c.studentId === st.studentId),
+        ),
+      );
+    } catch (err) {
+      Alert.alert("Lỗi", getErrorMessage(err));
+    } finally {
+      setSearchingChild(false);
+    }
+  };
+
+  const addChild = (child: StudentListItem) => {
+    setSelectedChildren((prev) => [...prev, child]);
+    setChildResults((prev) => prev.filter((st) => st.studentId !== child.studentId));
+  };
+
+  const removeChild = (studentId: string) => {
+    setSelectedChildren((prev) => prev.filter((c) => c.studentId !== studentId));
+  };
 
   const handleSubmit = async () => {
     if (
@@ -191,6 +239,8 @@ export default function AdminCreateUserScreen() {
         roleId: form.roleId,
         classYearId: form.classYearId,
         subjectId: form.subjectId ? [form.subjectId] : [],
+        studentIds: selectedChildren.map((c) => c.studentId),
+        relationship: relationship || undefined,
       });
       Alert.alert("Thành công", `Đã tạo tài khoản cho ${form.fullName}`, [
         { text: "OK", onPress: () => router.back() },
@@ -312,7 +362,9 @@ export default function AdminCreateUserScreen() {
                       ? "Giáo viên"
                       : r.name === "Student"
                         ? "Học sinh"
-                        : r.name;
+                        : r.name === "Parent"
+                          ? "Phụ huynh"
+                          : r.name;
 
                 return (
                   <View
@@ -544,6 +596,154 @@ export default function AdminCreateUserScreen() {
                   </View>
                 ))}
               </View>
+            </View>
+          )}
+
+          {isParent && (
+            <View
+              style={{
+                marginBottom: 40,
+                backgroundColor: "#F0FDFA",
+                padding: 24,
+                borderRadius: 32,
+                borderWidth: 1,
+                borderColor: "#CCFBF1",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Poppins-Bold",
+                  color: "#0F766E",
+                  fontSize: 13,
+                  marginBottom: 20,
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                }}
+              >
+                Thông tin phụ huynh
+              </Text>
+
+              <FormLabel>Quan hệ với học sinh</FormLabel>
+              <View
+                style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8, marginBottom: 12 }}
+              >
+                {["Bố", "Mẹ", "Người giám hộ"].map((rel) => (
+                  <View key={rel} style={{ marginRight: 10, marginBottom: 10 }}>
+                    <Pressable
+                      onPress={() => setRelationship(relationship === rel ? "" : rel)}
+                      style={{
+                        paddingHorizontal: 16,
+                        paddingVertical: 12,
+                        borderRadius: 16,
+                        borderWidth: 1,
+                        backgroundColor: relationship === rel ? "#0D9488" : "#FFFFFF",
+                        borderColor: relationship === rel ? "#0D9488" : "#F1F5F9",
+                        elevation: relationship === rel ? 3 : 1,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: "Poppins-Bold",
+                          fontSize: 11,
+                          color: relationship === rel ? "white" : "#6B7280",
+                        }}
+                      >
+                        {rel}
+                      </Text>
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+
+              <FormLabel>Gắn học sinh (con)</FormLabel>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: "#F1F5F9",
+                  paddingHorizontal: 16,
+                  marginTop: 8,
+                }}
+              >
+                <TextInput
+                  value={childQuery}
+                  onChangeText={setChildQuery}
+                  onSubmitEditing={searchChildren}
+                  placeholder="Nhập tên học sinh để tìm"
+                  placeholderTextColor="#9CA3AF"
+                  returnKeyType="search"
+                  style={{ flex: 1, paddingVertical: 14, fontFamily: "Poppins-Regular", color: "#000" }}
+                />
+                <TouchableOpacity onPress={searchChildren} disabled={searchingChild}>
+                  {searchingChild ? (
+                    <ActivityIndicator size="small" color="#0D9488" />
+                  ) : (
+                    <Ionicons name="search" size={20} color="#0D9488" />
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {childResults.map((st) => (
+                <Pressable
+                  key={st.studentId}
+                  onPress={() => addChild(st)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 16,
+                    padding: 14,
+                    marginTop: 8,
+                    borderWidth: 1,
+                    borderColor: "#F1F5F9",
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 13, color: "#111827" }}>
+                      {st.fullName}
+                    </Text>
+                    <Text style={{ fontFamily: "Poppins-Regular", fontSize: 11, color: "#9CA3AF" }}>
+                      {st.className ? "Lớp " + st.className : "Chưa có lớp"}
+                    </Text>
+                  </View>
+                  <Ionicons name="add-circle-outline" size={22} color="#0D9488" />
+                </Pressable>
+              ))}
+
+              {selectedChildren.length > 0 && (
+                <View style={{ marginTop: 16 }}>
+                  <FormLabel>Đã chọn</FormLabel>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
+                    {selectedChildren.map((c) => (
+                      <View
+                        key={c.studentId}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: "#0D9488",
+                          borderRadius: 16,
+                          paddingLeft: 14,
+                          paddingRight: 8,
+                          paddingVertical: 8,
+                          marginRight: 8,
+                          marginBottom: 8,
+                        }}
+                      >
+                        <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: "white" }}>
+                          {c.fullName}
+                        </Text>
+                        <TouchableOpacity onPress={() => removeChild(c.studentId)} style={{ marginLeft: 6 }}>
+                          <Ionicons name="close-circle" size={18} color="white" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
             </View>
           )}
         </ScrollView>

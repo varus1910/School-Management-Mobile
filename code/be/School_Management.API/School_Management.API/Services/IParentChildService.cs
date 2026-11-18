@@ -1,0 +1,15 @@
+using School_Management.API.Models.DTO;
+
+namespace School_Management.API.Services
+{
+    // Dữ liệu của con mà phụ huynh được phép xem (chỉ đọc).
+    // Mọi hàm đều kiểm tra học sinh có phải là con của phụ huynh đang đăng nhập hay không.
+    public interface IParentChildService
+    {
+        public Task<PagedResponse<FeeDetailResponse>> GetChildFees(Guid parentUserId, Guid studentId, MyFeeDetailFilterRequest request);
+        public Task<ResultForStudentResponse> GetChildResults(Guid parentUserId, Guid studentId, ResultOfStudentRequest request);
+        public Task<StudentAttendanceResponse> GetChildAttendance(Guid parentUserId, Guid studentId, StudentAttedanceRequest request);
+        public Task<List<ScheduleDetailResponse>> GetChildSchedule(Guid parentUserId, Guid studentId, ScheduleDetailIsActiveRequest request);
+        public Task<List<MyExamScheduleDetailResponse>> GetChildExamSchedule(Guid parentUserId, Guid studentId, MyExamScheduleDetailRequest request);
+    }
+}

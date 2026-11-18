@@ -100,6 +100,7 @@ export default function RootLayout() {
         <Stack.Screen name="student" options={{ headerShown: false, title: "Học sinh" }} />
         <Stack.Screen name="admin" options={{ headerShown: false, title: "Quản trị viên" }} />
         <Stack.Screen name="teacher" options={{ headerShown: false, title: "Giáo viên" }} />
+        <Stack.Screen name="parent" options={{ headerShown: false, title: "Phụ huynh" }} />
       </Stack>
       <StatusBar hidden />
     </ThemeProvider>

@@ -13,12 +13,14 @@ namespace School_Management.API.Repositories
     {
         private readonly ApplicationDbContext context;
         private readonly INotificationService notificationService;
+        private readonly IParentRepository parentRepository;
         private readonly ILogger<FeeRepository> logger;
 
-        public FeeRepository(ApplicationDbContext context, INotificationService notificationService, ILogger<FeeRepository> logger)
+        public FeeRepository(ApplicationDbContext context, INotificationService notificationService, IParentRepository parentRepository, ILogger<FeeRepository> logger)
         {
             this.context = context;
             this.notificationService = notificationService;
+            this.parentRepository = parentRepository;
             this.logger = logger;
         }
         public async Task<(FeeResponse? data, string message)> CreateFee(FeeRequest request)
@@ -90,6 +92,25 @@ namespace School_Management.API.Repositories
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Push notification failed");
+                }
+
+                try
+                {
+                    var parentUserIds = await parentRepository.GetParentUserIdsByStudentIds(studentIds);
+                    if (parentUserIds.Count > 0)
+                    {
+                        await notificationService.CreateNotification(new CreateNotificationRequest
+                        {
+                            Content = $"Con bạn có học phí mới năm học {request.SchoolYear} - {request.SchoolYear + 1}",
+                            Title = "Học phí mới",
+                            Type = "Tạo học phí",
+                            UserId = parentUserIds
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Push notification to parents failed");
                 }
 
                 var result = new FeeResponse

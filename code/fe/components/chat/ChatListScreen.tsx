@@ -27,7 +27,7 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
   const initial = item.displayName.charAt(0).toUpperCase();
   
   const getAvatarColor = (name: string) => {
-    const colors = ["bg-rose-500", "bg-blue-500", "bg-teal-500", "bg-indigo-500", "bg-purple-500", "bg-orange-500"];
+    const colors = ["bg-rose-500", "bg-blue-500", "bg-teal-500", "bg-blue-500", "bg-purple-500", "bg-orange-500"];
     const index = name.length % colors.length;
     return colors[index];
   };
@@ -48,14 +48,14 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
     <TouchableOpacity
       onPress={onPress}
       className={`flex-row items-center p-4 border-b border-gray-100 ${
-        isUnread ? "bg-indigo-50/30" : "bg-white"
+        isUnread ? "bg-blue-50/60" : "bg-white"
       } active:bg-gray-50`}
     >
-      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!item.avatarUrl ? getAvatarColor(item.displayName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
+      <View className={`w-14 h-14 rounded-full items-center justify-center mr-4 ${!item.avatarUrl ? getAvatarColor(item.displayName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
         {item.avatarUrl ? (
           <Image className="rounded-full" 
             source={{ uri: item.avatarUrl }} 
-            style={{ width: 48, height: 48, borderRadius: 9999 }}
+            style={{ width: 56, height: 56, borderRadius: 9999 }}
             contentFit="cover"
             transition={200}
           />
@@ -77,7 +77,7 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
           >
             {item.displayName}
           </Text>
-          <Text style={{ fontFamily: "Poppins-Regular" }} className={`text-[11px] ${isUnread ? "text-indigo-600 font-bold" : "text-gray-400"}`}>
+          <Text style={{ fontFamily: "Poppins-Regular" }} className={`text-[11px] ${isUnread ? "text-[#136ADA] font-bold" : "text-gray-400"}`}>
             {new Date(fbConvo?.lastMessageAt || item.lastUpdatedAt).toLocaleTimeString("vi-VN", {
               hour: "2-digit",
               minute: "2-digit",
@@ -91,7 +91,7 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
               fontStyle: fbConvo?.lastMessageObj?.type === "System" ? "italic" : "normal"
             }}
             className={`text-[13px] flex-1 mr-4 ${
-              isUnread ? "text-indigo-600" : 
+              isUnread ? "text-[#136ADA]" : 
               fbConvo?.lastMessageObj?.type === "System" ? "text-gray-400" : "text-gray-500"
             }`}
             numberOfLines={1}
@@ -113,7 +113,7 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
 
 const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => void }) => {
   const getAvatarColor = (name: string) => {
-    const colors = ["bg-blue-500", "bg-purple-500", "bg-indigo-500", "bg-rose-500", "bg-teal-500"];
+    const colors = ["bg-blue-500", "bg-purple-500", "bg-blue-500", "bg-rose-500", "bg-teal-500"];
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -126,11 +126,11 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
       onPress={onSelect}
       className="flex-row items-center p-4 border-b border-gray-100 bg-white active:bg-gray-50"
     >
-      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!user.avatarUrl ? getAvatarColor(user.fullName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
+      <View className={`w-14 h-14 rounded-full items-center justify-center mr-4 ${!user.avatarUrl ? getAvatarColor(user.fullName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
         {user.avatarUrl ? (
           <Image className="rounded-full" 
             source={{ uri: user.avatarUrl }} 
-            style={{ width: 48, height: 48, borderRadius: 9999 }}
+            style={{ width: 56, height: 56, borderRadius: 9999 }}
             contentFit="cover"
             transition={200}
           />
@@ -145,8 +145,8 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
           {user.fullName}
         </Text>
         <View className="flex-row items-center">
-          <View className="bg-indigo-50 px-2 py-0.5 rounded-md mr-2">
-            <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-indigo-600 text-[10px] uppercase">
+          <View className="bg-blue-50 px-2 py-0.5 rounded-md mr-2">
+            <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-[#136ADA] text-[10px] uppercase">
               {user.role}
             </Text>
           </View>
@@ -155,13 +155,13 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
           </Text>
         </View>
       </View>
-      <Ionicons name="chatbubble-outline" size={20} color="#6366F1" />
+      <Ionicons name="chatbubble-outline" size={20} color="#136ADA" />
     </TouchableOpacity>
   );
 });
 
 interface ChatListScreenProps {
-  rolePrefix: "admin" | "teacher" | "student";
+  rolePrefix: "admin" | "teacher" | "student" | "parent";
 }
 
 export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
@@ -274,23 +274,25 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       {/* Header Section */}
-      <View className="bg-white border-b border-gray-50 pt-2">
-        <View className="flex-row items-center justify-between px-6 py-2">
-          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-            <Ionicons name="chevron-back" size={28} color="black" />
-          </TouchableOpacity>
-          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-gray-900">
-            Trò chuyện
-          </Text>
+      <View className="bg-white px-6 pt-4 pb-3">
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-2xl text-gray-900">
+              Tin nhắn
+            </Text>
+            <Text style={{ fontFamily: "Poppins-Regular" }} className="text-xs text-gray-400">
+              Trò chuyện với bạn bè, thầy cô và nhà trường
+            </Text>
+          </View>
           <TouchableOpacity
             onPress={() => router.push(`/${rolePrefix}/chat/new-group` as any)}
-            className="bg-indigo-600 px-3 py-1.5 rounded-full shadow-sm shadow-indigo-200"
+            className="bg-[#136ADA] px-4 py-2 rounded-full shadow-sm shadow-blue-200"
           >
             <View className="flex-row items-center">
               <Ionicons name="add" size={16} color="white" />
-              <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "bold", fontFamily: "Poppins-Bold", marginLeft: 2 }}>
+              <Text style={{ color: "#FFFFFF", fontSize: 11, fontFamily: "Poppins-Bold", marginLeft: 2 }}>
                 Nhóm
               </Text>
             </View>
@@ -298,29 +300,27 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
         </View>
 
         {/* Tab Switcher */}
-        <View className="flex-row px-6 mb-2">
-          <TouchableOpacity
-            onPress={() => setActiveTab("chats")}
-            className={`mr-8 py-2 border-b-2 ${activeTab === "chats" ? "border-indigo-600" : "border-transparent"}`}
-          >
-            <Text
-              style={{ fontFamily: activeTab === "chats" ? "Poppins-Bold" : "Poppins-Medium" }}
-              className={`text-sm ${activeTab === "chats" ? "text-indigo-600" : "text-gray-400"}`}
+        <View className="flex-row bg-gray-100 p-1 rounded-2xl mt-4">
+          {(
+            [
+              ["chats", "Tin nhắn"],
+              ["users", "Người dùng"],
+            ] as const
+          ).map(([key, label]) => (
+            <TouchableOpacity
+              key={key}
+              onPress={() => setActiveTab(key)}
+              className={`flex-1 py-2 rounded-xl items-center ${activeTab === key ? "bg-white" : ""}`}
+              style={activeTab === key ? { elevation: 2, shadowColor: "#000", shadowOpacity: 0.08, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } } : undefined}
             >
-              Tin nhắn
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setActiveTab("users")}
-            className={`py-2 border-b-2 ${activeTab === "users" ? "border-indigo-600" : "border-transparent"}`}
-          >
-            <Text
-              style={{ fontFamily: activeTab === "users" ? "Poppins-Bold" : "Poppins-Medium" }}
-              className={`text-sm ${activeTab === "users" ? "text-indigo-600" : "text-gray-400"}`}
-            >
-              Người dùng
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={{ fontFamily: activeTab === key ? "Poppins-SemiBold" : "Poppins-Medium" }}
+                className={`text-sm ${activeTab === key ? "text-[#136ADA]" : "text-gray-400"}`}
+              >
+                {label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -337,7 +337,7 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          {(loading || loadingUsers) && <ActivityIndicator size="small" color="#6366F1" />}
+          {(loading || loadingUsers) && <ActivityIndicator size="small" color="#136ADA" />}
         </View>
       </View>
 

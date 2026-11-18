@@ -6,8 +6,8 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { userService } from "../../services/user.service";
@@ -15,7 +15,7 @@ import { conversationService } from "../../services/conversation.service";
 import { UserListItem } from "../../types/user";
 
 interface NewChatScreenProps {
-  rolePrefix: "admin" | "teacher" | "student";
+  rolePrefix: "admin" | "teacher" | "student" | "parent";
 }
 
 export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
@@ -82,7 +82,7 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
   };
 
   const getAvatarColor = (name: string) => {
-    const colors = ["bg-rose-500", "bg-blue-500", "bg-teal-500", "bg-indigo-500"];
+    const colors = ["bg-rose-500", "bg-blue-500", "bg-teal-500", "bg-blue-500"];
     const index = name.length % colors.length;
     return colors[index];
   };
@@ -113,7 +113,7 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          {loading && <ActivityIndicator size="small" color="#6366F1" />}
+          {loading && <ActivityIndicator size="small" color="#136ADA" />}
         </View>
       </View>
 

@@ -21,6 +21,7 @@ import { CourseResponse } from "../../../types/course";
 import { SubjectResponse } from "../../../types/subject";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { coverColorFor } from "../../../utils/coverColor";
 
 type Status = "pending" | "approved" | "rejected";
 
@@ -325,15 +326,15 @@ export default function AdminCoursesScreen() {
 
       {/* Courses List */}
       {loading && !refreshing ? (
-        <View className="flex-1 items-center justify-center bg-white">
+        <View className="flex-1 items-center justify-center bg-[#F8FAFC]">
           <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
         <FlatList
           data={courses}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 24, gap: 16, paddingBottom: 150 }}
-          className="bg-white"
+          contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 150 }}
+          className="bg-[#F8FAFC]"
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -344,50 +345,57 @@ export default function AdminCoursesScreen() {
           renderItem={({ item }) => {
             const statusKey = item.status.toLowerCase() as Status;
             const cfg = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pending;
+            const cover = coverColorFor(item.subjectName || item.courseName);
             return (
               <TouchableOpacity
-                activeOpacity={0.7}
-                className="bg-white rounded-[32px] p-5 border border-gray-100 shadow-sm"
+                activeOpacity={0.85}
+                className="bg-white rounded-[28px] overflow-hidden border border-gray-100 shadow-sm shadow-gray-200"
                 onPress={() => router.push(`/admin/courses/${item.id}` as any)}
               >
-                <View className="flex-row justify-between items-start mb-4">
-                  <View className="flex-1 pr-4">
-                    <View className="flex-row items-center gap-2 mb-2">
-                       <View className={`${cfg.bg} px-3 py-1 rounded-full flex-row items-center gap-1`}>
-                          <Ionicons name={cfg.icon as any} size={12} color={cfg.text} />
-                          <Text style={{ fontFamily: "Poppins-Bold", color: cfg.text, fontSize: 9 }}>
-                            {cfg.label.toUpperCase()}
-                          </Text>
-                       </View>
-                       <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-300 text-[10px]">
-                          {new Date(item.createdAt).toLocaleDateString('vi-VN')}
-                       </Text>
-                    </View>
-                    <Text
-                      numberOfLines={2}
-                      className="text-black text-base leading-6"
-                      style={{ fontFamily: "Poppins-Bold" }}
-                    >
-                      {item.courseName}
-                    </Text>
+                {/* Ảnh bìa màu theo môn học */}
+                <View className="h-24 px-5 py-4 justify-between overflow-hidden" style={{ backgroundColor: cover }}>
+                  <View className="absolute" style={{ right: -10, bottom: -16, opacity: 0.18 }}>
+                    <Ionicons name="journal" size={96} color="white" />
                   </View>
-                  <View className="w-12 h-12 bg-blue-50/50 rounded-2xl items-center justify-center border border-blue-100/50">
-                    <Ionicons name="journal-outline" size={24} color="#136ADA" />
+                  <View className="flex-row items-center justify-between">
+                    <View className="bg-white/25 px-3 py-1 rounded-full" style={{ maxWidth: "60%" }}>
+                      <Text numberOfLines={1} style={{ fontFamily: "Poppins-SemiBold" }} className="text-white text-[10px]">
+                        {item.subjectName}
+                      </Text>
+                    </View>
+                    <View className={`${cfg.bg} px-3 py-1 rounded-full flex-row items-center gap-1`}>
+                      <Ionicons name={cfg.icon as any} size={12} color={cfg.text} />
+                      <Text style={{ fontFamily: "Poppins-Bold", color: cfg.text, fontSize: 9 }}>
+                        {cfg.label.toUpperCase()}
+                      </Text>
+                    </View>
                   </View>
                 </View>
 
-                <View className="flex-row items-center justify-between pt-4 border-t border-gray-50">
-                  <View>
-                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] mb-1">CHUYÊN MÔN</Text>
-                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-700 text-xs">
-                       {item.subjectName} · {item.teacherName}
+                <View className="p-5">
+                  <Text numberOfLines={2} className="text-gray-900 text-base leading-6" style={{ fontFamily: "Poppins-Bold" }}>
+                    {item.courseName}
+                  </Text>
+                  <View className="flex-row items-center gap-1.5 mt-2">
+                    <Ionicons name="person-circle-outline" size={16} color="#9CA3AF" />
+                    <Text numberOfLines={1} style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs flex-1">
+                      {item.teacherName}
+                    </Text>
+                    <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">
+                      {new Date(item.createdAt).toLocaleDateString("vi-VN")}
                     </Text>
                   </View>
-                  <View className="items-end">
-                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] mb-1">HỌC PHÍ</Text>
-                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-blue-600 text-sm">
-                       {fmt(item.price)}
-                    </Text>
+                  <View className="flex-row items-center justify-between pt-4 mt-4 border-t border-gray-50">
+                    <View>
+                      <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">HỌC PHÍ</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-lg">
+                        {fmt(item.price)}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center bg-blue-50 px-4 py-2 rounded-full">
+                      <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-[#136ADA] text-xs mr-1">Chi tiết</Text>
+                      <Ionicons name="arrow-forward" size={14} color="#136ADA" />
+                    </View>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -395,8 +403,8 @@ export default function AdminCoursesScreen() {
           }}
           ListEmptyComponent={
             <View className="items-center py-20">
-              <View className="bg-gray-50 w-20 h-20 rounded-full items-center justify-center mb-6">
-                 <Ionicons name="folder-open-outline" size={40} color="#D1D5DB" />
+              <View className="bg-blue-50 w-20 h-20 rounded-full items-center justify-center mb-6">
+                 <Ionicons name="folder-open-outline" size={40} color="#136ADA" />
               </View>
               <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-600 text-lg mb-2">Trống</Text>
               <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-center px-10 text-xs">

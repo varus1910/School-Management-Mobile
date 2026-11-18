@@ -6,6 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { eventService } from "../../services/event.service";
 import { EventItem } from "../../types/event";
 import { useConfigStore } from "../../store/configStore";
+import EventCard from "../../components/events/EventCard";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export default function EventsTab() {
   const { schoolYear, term } = useConfigStore();
@@ -41,15 +43,6 @@ export default function EventsTab() {
     fetchEvents();
   };
 
-  const getStatus = (item: EventItem) => {
-    const now = new Date();
-    const s = new Date(`${item.eventDate}T${item.startTime}`);
-    const f = new Date(`${item.eventDate}T${item.finishTime}`);
-    if (now < s) return { label: 'Sắp tới', color: 'text-blue-500', bg: 'bg-blue-50' };
-    if (now > f) return { label: 'Đã kết thúc', color: 'text-gray-400', bg: 'bg-gray-50' };
-    return { label: 'Đang diễn ra', color: 'text-green-500', bg: 'bg-green-50' };
-  };
-
   const filteredEvents = events.filter(e => {
     if (activeTab === 'Tất cả') return true;
     const now = new Date();
@@ -62,17 +55,10 @@ export default function EventsTab() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: false }} />
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View className="flex-1 items-center">
-          <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>Sự kiện trường học</Text>
-        </View>
-        <View className="w-10" />
+      <View className="bg-white border-b border-gray-50">
+        <PageHeader title="Sự kiện trường học" subtitle="Hoạt động và thông báo của nhà trường" />
       </View>
 
       {/* Search Bar */}
@@ -106,45 +92,15 @@ export default function EventsTab() {
       <FlatList
         data={filteredEvents}
         keyExtractor={(item) => item.eventId}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        className="bg-[#F8FAFC]"
+        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        renderItem={({ item }) => {
-          const status = getStatus(item);
-          return (
-            <View className="bg-white border border-gray-100 rounded-2xl p-4 mb-4 shadow-sm shadow-blue-50/20">
-              <View className="flex-row items-center justify-between mb-2">
-                <View className={`${status.bg} px-2.5 py-1 rounded-full px-3`}>
-                  <Text className={`${status.color} text-[10px]`} style={{ fontFamily: "Poppins-Bold" }}>{status.label.toUpperCase()}</Text>
-                </View>
-                <Text className="text-gray-300 text-[10px]" style={{ fontFamily: "Poppins-Medium" }}>Học kỳ {item.term} · {item.schoolYear}</Text>
-              </View>
-
-              <Text className="text-black text-lg mb-1" style={{ fontFamily: "Poppins-Bold" }}>{item.title}</Text>
-              <Text className="text-gray-500 text-xs mb-4 leading-5" style={{ fontFamily: "Poppins-Regular" }}>{item.body}</Text>
-              
-              <View className="flex-row items-center justify-between border-t border-gray-50 pt-3">
-                <View className="flex-row items-center gap-1.5">
-                  <Ionicons name="calendar-outline" size={14} color="#136ADA" />
-                  <Text className="text-gray-600 text-[11px]" style={{ fontFamily: "Poppins-Medium" }}>
-                    {new Date(item.eventDate).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </Text>
-                </View>
-
-                <View className="flex-row items-center gap-1.5">
-                  <Ionicons name="time-outline" size={14} color="#136ADA" />
-                  <Text className="text-gray-600 text-[11px]" style={{ fontFamily: "Poppins-Medium" }}>
-                    {item.startTime.slice(0, 5)} - {item.finishTime.slice(0, 5)}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          );
-        }}
+        renderItem={({ item }) => <EventCard item={item} />}
         ListEmptyComponent={
           loading && !refreshing ? <ActivityIndicator size="large" color="#136ADA" className="mt-20" /> : (
             <View className="items-center justify-center mt-20">
-              <View className="bg-gray-100 w-20 h-20 rounded-full items-center justify-center mb-4">
-                <Ionicons name="calendar-outline" size={40} color="#D1D5DB" />
+              <View className="bg-blue-50 w-20 h-20 rounded-full items-center justify-center mb-4">
+                <Ionicons name="calendar-outline" size={36} color="#136ADA" />
               </View>
               <Text className="text-gray-400 text-center" style={{ fontFamily: "Poppins-Medium" }}>Không tìm thấy sự kiện</Text>
               <Text className="text-gray-300 text-[10px] mt-1 text-center" style={{ fontFamily: "Poppins-Regular" }}>Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm</Text>

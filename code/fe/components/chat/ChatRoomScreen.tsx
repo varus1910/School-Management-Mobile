@@ -83,12 +83,14 @@ const MessageBubble = ({
           item.isDeleted
             ? "bg-gray-100/50 border border-gray-200/50"
             : isMe
-            ? "bg-indigo-600"
+            ? "bg-[#136ADA]"
             : isEmojiOnly ? "bg-transparent" : "bg-gray-100 border border-gray-200/50"
         }`}
         style={{
           borderRadius: 20,
-          shadowColor: isMe && !item.isDeleted ? "#4F46E5" : "#000",
+          borderBottomRightRadius: isMe && !isEmojiOnly ? 6 : 20,
+          borderBottomLeftRadius: !isMe && !isEmojiOnly ? 6 : 20,
+          shadowColor: isMe && !item.isDeleted ? "#136ADA" : "#000",
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: isMe && !item.isDeleted ? 0.2 : 0.05,
           shadowRadius: 2,
@@ -602,7 +604,7 @@ export default function ChatRoomScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1">
             <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
-          <View className="w-10 h-10 rounded-full bg-indigo-50 items-center justify-center mr-3 overflow-hidden">
+          <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3 overflow-hidden">
             {isGroup ? (
               (currentConversation?.avatarUrl || avatarUrlParam) ? (
                 <Image className="rounded-full" 
@@ -612,7 +614,7 @@ export default function ChatRoomScreen() {
                   transition={200}
                 />
               ) : (
-                <Ionicons name="people" size={20} color="#6366F1" />
+                <Ionicons name="people" size={20} color="#136ADA" />
               )
             ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
               <Image className="rounded-full" 
@@ -622,7 +624,7 @@ export default function ChatRoomScreen() {
                 transition={200}
               />
             ) : (
-              <Ionicons name="person" size={20} color="#6366F1" />
+              <Ionicons name="person" size={20} color="#136ADA" />
             )}
           </View>
           <TouchableOpacity onPress={() => handleShowInfo()}>
@@ -656,7 +658,7 @@ export default function ChatRoomScreen() {
       {/* Messages */}
       {loading ? (
         <View className="flex-1 items-center justify-center bg-gray-50/30">
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
         <FlatList
@@ -670,7 +672,7 @@ export default function ChatRoomScreen() {
           showsVerticalScrollIndicator={false}
           ListFooterComponent={() => (
             <View className="items-center py-10 px-6">
-              <View className="w-16 h-16 bg-indigo-50 rounded-full items-center justify-center mb-4 overflow-hidden">
+              <View className="w-16 h-16 bg-blue-50 rounded-full items-center justify-center mb-4 overflow-hidden">
                 {isGroup ? (
                   (currentConversation?.avatarUrl || avatarUrlParam) ? (
                     <Image className="rounded-full" 
@@ -680,7 +682,7 @@ export default function ChatRoomScreen() {
                       transition={200}
                     />
                   ) : (
-                    <Ionicons name="people" size={32} color="#6366F1" />
+                    <Ionicons name="people" size={32} color="#136ADA" />
                   )
                 ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
                   <Image className="rounded-full" 
@@ -690,7 +692,7 @@ export default function ChatRoomScreen() {
                     transition={200}
                   />
                 ) : (
-                  <Ionicons name="person" size={32} color="#6366F1" />
+                  <Ionicons name="person" size={32} color="#136ADA" />
                 )}
               </View>
               <Text
@@ -703,7 +705,7 @@ export default function ChatRoomScreen() {
               </Text>
               <Text
                 style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-indigo-600 text-center mb-2"
+                className="text-[#136ADA] text-center mb-2"
               >
                 {isGroup ? (currentConversation?.displayName || name) : name}
               </Text>
@@ -742,12 +744,12 @@ export default function ChatRoomScreen() {
             <TouchableOpacity
               onPress={handleSend}
               disabled={sending}
-              className="ml-2 p-1"
+              className="ml-2 w-9 h-9 rounded-full bg-[#136ADA] items-center justify-center"
             >
               {sending ? (
-                <ActivityIndicator size="small" color="#6366F1" />
+                <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Ionicons name="send" size={20} color="#6366F1" />
+                <Ionicons name="send" size={16} color="#FFFFFF" />
               )}
             </TouchableOpacity>
           )}
@@ -786,9 +788,9 @@ export default function ChatRoomScreen() {
                         }
                       });
                     }}
-                    className="p-2 bg-indigo-50 rounded-full"
+                    className="p-2 bg-blue-50 rounded-full"
                   >
-                    <Ionicons name="create-outline" size={20} color="#6366F1" />
+                    <Ionicons name="create-outline" size={20} color="#136ADA" />
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
@@ -806,7 +808,7 @@ export default function ChatRoomScreen() {
 
             {viewingMember ? (
               <View className="items-center py-6">
-                <View className="w-24 h-24 bg-indigo-100 rounded-full items-center justify-center mb-4 overflow-hidden">
+                <View className="w-24 h-24 bg-blue-100 rounded-full items-center justify-center mb-4 overflow-hidden">
                   {(otherUserProfile?.avatarUrl || viewingMember.avatarUrl) ? (
                     <Image className="rounded-full" 
                       source={{ uri: otherUserProfile?.avatarUrl || viewingMember.avatarUrl || '' }} 
@@ -817,7 +819,7 @@ export default function ChatRoomScreen() {
                   ) : (
                   <Text
                     style={{ fontFamily: "Poppins-Bold" }}
-                    className="text-4xl text-indigo-600"
+                    className="text-4xl text-[#136ADA]"
                   >
                     {viewingMember.fullName.charAt(0).toUpperCase()}
                   </Text>
@@ -827,7 +829,7 @@ export default function ChatRoomScreen() {
                 {loadingProfile ? (
                   <ActivityIndicator
                     size="small"
-                    color="#6366F1"
+                    color="#136ADA"
                     className="mb-6"
                   />
                 ) : (
@@ -842,7 +844,7 @@ export default function ChatRoomScreen() {
                     </Text>
                     <Text
                       style={{ fontFamily: "Poppins-Regular" }}
-                      className="text-sm text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full mb-3"
+                      className="text-sm text-[#136ADA] bg-blue-50 px-3 py-1 rounded-full mb-3"
                     >
                       {otherUserProfile ? otherUserProfile.role : "Thành viên"}
                     </Text>
@@ -883,12 +885,12 @@ export default function ChatRoomScreen() {
 
                 <View className="flex-row gap-4">
                   <TouchableOpacity
-                    className="bg-indigo-50 px-8 py-3 rounded-full flex-row items-center"
+                    className="bg-blue-50 px-8 py-3 rounded-full flex-row items-center"
                     onPress={handleCloseModal}
                   >
                     <Text
                       style={{ fontFamily: "Poppins-SemiBold" }}
-                      className="text-indigo-600"
+                      className="text-[#136ADA]"
                     >
                       {isGroup ? "Quay lại" : "Đóng"}
                     </Text>
@@ -907,7 +909,7 @@ export default function ChatRoomScreen() {
                       onPress={() => handleShowInfo(item)}
                       disabled={item.userId === userInfo?.id}
                     >
-                      <View className="w-12 h-12 bg-indigo-100 rounded-full items-center justify-center mr-4 overflow-hidden">
+                      <View className="w-12 h-12 bg-blue-100 rounded-full items-center justify-center mr-4 overflow-hidden">
                         {item.avatarUrl ? (
                           <Image className="rounded-full" 
                             source={{ uri: item.avatarUrl }} 
@@ -918,7 +920,7 @@ export default function ChatRoomScreen() {
                         ) : (
                         <Text
                           style={{ fontFamily: "Poppins-Bold" }}
-                          className="text-indigo-600 text-lg"
+                          className="text-[#136ADA] text-lg"
                         >
                           {item.fullName.charAt(0).toUpperCase()}
                         </Text>
@@ -955,7 +957,7 @@ export default function ChatRoomScreen() {
                 {isGroup && (
                   <View className="mt-6 gap-3">
                     <TouchableOpacity
-                      className="bg-indigo-600 py-3 rounded-2xl flex-row items-center justify-center"
+                      className="bg-[#136ADA] py-3 rounded-2xl flex-row items-center justify-center"
                       onPress={() => {
                         setShowInfoModal(false);
                         router.push({

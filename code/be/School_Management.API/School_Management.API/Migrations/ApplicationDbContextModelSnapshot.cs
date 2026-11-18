@@ -71,6 +71,13 @@ namespace School_Management.API.Migrations
                             ConcurrencyStamp = "88ad671c-a2bc-4d35-85c6-02f42bfb3a0c",
                             Name = "Student",
                             NormalizedName = "STUDENT"
+                        },
+                        new
+                        {
+                            Id = new Guid("5c1f7a3e-9b24-4d86-8a51-3e7d2c9f4b10"),
+                            ConcurrencyStamp = "5c1f7a3e-9b24-4d86-8a51-3e7d2c9f4b10",
+                            Name = "Parent",
+                            NormalizedName = "PARENT"
                         });
                 });
 
@@ -991,6 +998,49 @@ namespace School_Management.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Parent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Parent");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.ParentStudent", b =>
+                {
+                    b.Property<Guid>("ParentStudentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ParentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Relationship")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ParentStudentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("ParentId", "StudentId")
+                        .IsUnique();
+
+                    b.ToTable("ParentStudent");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1696,6 +1746,36 @@ namespace School_Management.API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Parent", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.AppUser", "User")
+                        .WithOne("Parent")
+                        .HasForeignKey("School_Management.API.Models.Domain.Parent", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.ParentStudent", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Parent", "Parent")
+                        .WithMany("ParentStudents")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("School_Management.API.Models.Domain.Student", "Student")
+                        .WithMany("ParentStudents")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Payment", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.Course", "Course")
@@ -1885,6 +1965,8 @@ namespace School_Management.API.Migrations
 
                     b.Navigation("Notifications");
 
+                    b.Navigation("Parent");
+
                     b.Navigation("Payments");
 
                     b.Navigation("RefreshTokens");
@@ -1955,6 +2037,11 @@ namespace School_Management.API.Migrations
                     b.Navigation("LessonVideos");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Parent", b =>
+                {
+                    b.Navigation("ParentStudents");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Schedule", b =>
                 {
                     b.Navigation("ScheduleDetails");
@@ -1967,6 +2054,8 @@ namespace School_Management.API.Migrations
                     b.Navigation("ExamStudentAssignments");
 
                     b.Navigation("FeeDetails");
+
+                    b.Navigation("ParentStudents");
 
                     b.Navigation("Results");
 
