@@ -21,6 +21,7 @@ import { CourseResponse } from "../../../types/course";
 import { SubjectResponse } from "../../../types/subject";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { coverColorFor } from "../../../utils/coverColor";
 
 type Status = "pending" | "approved" | "rejected";
 
@@ -54,13 +55,6 @@ const TABS: { id: string; label: string }[] = [
   { id: "approved", label: "Đã duyệt" },
   { id: "rejected", label: "Từ chối" },
 ];
-
-const COVER_COLORS = ["#136ADA", "#6366F1", "#14B8A6", "#F97316", "#EC4899", "#8B5CF6"];
-const hashString = (str: string) => {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
-};
 
 export default function AdminCoursesScreen() {
   const router = useRouter();
@@ -351,7 +345,7 @@ export default function AdminCoursesScreen() {
           renderItem={({ item }) => {
             const statusKey = item.status.toLowerCase() as Status;
             const cfg = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pending;
-            const cover = COVER_COLORS[hashString(item.subjectName || item.courseName) % COVER_COLORS.length];
+            const cover = coverColorFor(item.subjectName || item.courseName);
             return (
               <TouchableOpacity
                 activeOpacity={0.85}
