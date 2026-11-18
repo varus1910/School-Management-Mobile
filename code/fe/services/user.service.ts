@@ -51,6 +51,7 @@ export const userService = {
    * POST /users
    * - role=Student → classYearId required
    * - role=Teacher → subjectId required
+   * - role=Parent → studentIds optional (children to link), relationship optional
    * AuthN(login) + AuthZ(Admin)
    * 400: thiếu trường / sai format
    * 409: username hoặc email đã tồn tại
@@ -70,6 +71,9 @@ export const userService = {
       formData.append("ClassYearId", payload.classYearId);
     } else if (payload.roleId.toLowerCase() === "teacher" && payload.subjectId) {
       payload.subjectId.forEach((id) => formData.append("SubjectId", id));
+    } else if (payload.roleId.toLowerCase() === "parent") {
+      payload.studentIds?.forEach((id) => formData.append("StudentIds", id));
+      if (payload.relationship) formData.append("Relationship", payload.relationship);
     }
 
     const response = await apiClient.post<UserResponse>("/users", formData, {
