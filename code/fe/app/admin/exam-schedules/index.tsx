@@ -5,7 +5,6 @@ import {
   FlatList,
   Modal,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
@@ -13,6 +12,7 @@ import {
   View,
   TouchableWithoutFeedback,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack, useFocusEffect } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";

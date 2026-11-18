@@ -5,12 +5,12 @@ import {
   FlatList,
   Modal,
   RefreshControl,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
   TouchableWithoutFeedback,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
