@@ -264,23 +264,24 @@ export default function AdminEventsScreen() {
 
       {/* Event List */}
       {loading && !refreshing ? (
-        <View className="flex-1 items-center justify-center bg-white">
+        <View className="flex-1 items-center justify-center bg-[#F8FAFC]">
           <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
         <FlatList
           data={filteredEvents}
           keyExtractor={(item, index) => item.eventId || index.toString()}
-          className="bg-white"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, gap: 16 }}
+          className="bg-[#F8FAFC]"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 20, gap: 14 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchEvents} tintColor="#136ADA" />}
           renderItem={({ item }) => {
             const status = getStatus(item);
+            const d = new Date(item.eventDate);
             return (
               <TouchableOpacity
-                activeOpacity={0.8}
-                className="bg-white border border-gray-100 rounded-[32px] p-5 shadow-sm"
+                activeOpacity={0.85}
+                className="bg-white border border-gray-100 rounded-[28px] p-4 flex-row shadow-sm shadow-gray-200"
                 onPress={() =>
                   router.push({
                     pathname: "/admin/events/create",
@@ -288,89 +289,77 @@ export default function AdminEventsScreen() {
                   } as any)
                 }
               >
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="flex-1 pr-4">
-                    <View className="flex-row items-center gap-2 mb-2">
-                      <View className={`${status.bg} px-2.5 py-1 rounded-lg`}>
-                        <Text
-                          className={`${status.color} text-[9px]`}
-                          style={{ fontFamily: "Poppins-Bold" }}
-                        >
-                          {status.label.toUpperCase()}
-                        </Text>
-                      </View>
-                      <Text
-                        className="text-gray-300 text-[10px]"
-                        style={{ fontFamily: "Poppins-Medium" }}
-                      >
-                        Học kỳ {item.term} · {item.schoolYear}
-                      </Text>
-                    </View>
-                    <Text
-                      numberOfLines={2}
-                      className="text-black text-base leading-6"
-                      style={{ fontFamily: "Poppins-Bold" }}
-                    >
-                      {item.title}
-                    </Text>
-                  </View>
-                  <View className="bg-blue-50/50 w-10 h-10 rounded-2xl items-center justify-center border border-blue-100/50">
-                    <Ionicons name="calendar" size={20} color="#136ADA" />
-                  </View>
+                {/* Ô ngày */}
+                <View className={`w-16 rounded-2xl items-center justify-center py-3 ${status.bg}`}>
+                  <Text className={`${status.color} text-2xl`} style={{ fontFamily: "Poppins-Bold" }}>
+                    {String(d.getDate()).padStart(2, "0")}
+                  </Text>
+                  <Text className={`${status.color} text-[10px] uppercase`} style={{ fontFamily: "Poppins-SemiBold" }}>
+                    Tháng {d.getMonth() + 1}
+                  </Text>
                 </View>
 
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-50/50">
-                  <View className="flex-row items-center gap-2">
+                <View className="flex-1 ml-4">
+                  <View className="flex-row items-center gap-2 mb-1.5">
+                    <View className={`${status.bg} px-2.5 py-1 rounded-full`}>
+                      <Text className={`${status.color} text-[9px]`} style={{ fontFamily: "Poppins-Bold" }}>
+                        {status.label.toUpperCase()}
+                      </Text>
+                    </View>
+                    <Text className="text-gray-400 text-[10px]" style={{ fontFamily: "Poppins-Medium" }}>
+                      HK{item.term} · {item.schoolYear}
+                    </Text>
+                  </View>
+                  <Text numberOfLines={2} className="text-gray-900 text-base leading-6" style={{ fontFamily: "Poppins-Bold" }}>
+                    {item.title}
+                  </Text>
+                  <View className="flex-row items-center gap-1.5 mt-1.5">
                     <Ionicons name="time-outline" size={14} color="#9CA3AF" />
-                    <Text
-                      className="text-gray-400 text-[11px]"
-                      style={{ fontFamily: "Poppins-Medium" }}
-                    >
-                      {new Date(item.eventDate).toLocaleDateString("en-GB")} ·{" "}
+                    <Text className="text-gray-500 text-[11px]" style={{ fontFamily: "Poppins-Medium" }}>
                       {item.startTime.slice(0, 5)} - {item.finishTime.slice(0, 5)}
                     </Text>
                   </View>
-                  <View className="flex-row items-center gap-3">
-                    <View className="relative z-50">
-                      <TouchableOpacity
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          setOpenMenuId(openMenuId === item.eventId ? null : item.eventId!);
-                        }}
-                        className="p-2"
-                      >
-                        <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
-                      </TouchableOpacity>
+                </View>
 
-                      {openMenuId === item.eventId && (
-                        <View 
-                          className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
-                          style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
-                        >
-                          <TouchableOpacity
-                            onPress={() => {
-                              setOpenMenuId(null);
-                              handleDeleteEvent(item.eventId!);
-                            }}
-                            className="flex-row items-center px-4 py-3"
-                          >
-                            <Ionicons name="trash-outline" size={16} color="#EF4444" />
-                            <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
-                              Xóa
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      )}
+                <View className="relative z-50">
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(openMenuId === item.eventId ? null : item.eventId!);
+                    }}
+                    className="p-2"
+                  >
+                    <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                  </TouchableOpacity>
+
+                  {openMenuId === item.eventId && (
+                    <View
+                      className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+                      style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          setOpenMenuId(null);
+                          handleDeleteEvent(item.eventId!);
+                        }}
+                        className="flex-row items-center px-4 py-3"
+                      >
+                        <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                        <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                          Xóa
+                        </Text>
+                      </TouchableOpacity>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
-                  </View>
+                  )}
                 </View>
               </TouchableOpacity>
             );
           }}
           ListEmptyComponent={
-            <View className="items-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 mx-6">
-              <Ionicons name="megaphone-outline" size={64} color="#D1D5DB" />
+            <View className="items-center py-20 bg-white rounded-[32px] border border-dashed border-gray-200">
+              <View className="w-20 h-20 rounded-full bg-blue-50 items-center justify-center">
+                <Ionicons name="megaphone-outline" size={36} color="#136ADA" />
+              </View>
               <Text
                 className="text-gray-400 text-center mt-4"
                 style={{ fontFamily: "Poppins-Medium" }}
@@ -379,7 +368,7 @@ export default function AdminEventsScreen() {
               </Text>
             </View>
           }
-          ListFooterComponent={<View className="h-20 bg-white" />}
+          ListFooterComponent={<View className="h-20" />}
         />
       )}
     </AdminPageWrapper>
