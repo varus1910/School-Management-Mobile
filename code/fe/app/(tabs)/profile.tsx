@@ -21,6 +21,8 @@ import * as ImagePicker from "expo-image-picker";
 import { studentService } from "../../services/student.service";
 import { useAuthStore } from "../../store/authStore";
 import { StudentResponse } from "../../types/student";
+import { InfoField, ProfileHero } from "../../components/ui/ProfileParts";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export default function StudentProfileScreen() {
   const { clearAuth, updateUserInfo } = useAuthStore();
@@ -132,20 +134,21 @@ export default function StudentProfileScreen() {
   const classInfo = (profile as any)?.classYearSub?.[0];
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]">
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-          Hồ sơ
-        </Text>
-        <TouchableOpacity className="p-2" onPress={openEdit}>
-          <Ionicons name="create-outline" size={24} color="#136ADA" />
-        </TouchableOpacity>
+      <View className="bg-white">
+        <PageHeader
+          title="Hồ sơ"
+          right={
+            <TouchableOpacity
+              onPress={openEdit}
+              className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center"
+            >
+              <Ionicons name="create-outline" size={20} color="#136ADA" />
+            </TouchableOpacity>
+          }
+        />
       </View>
 
       {loading ? (
@@ -154,34 +157,15 @@ export default function StudentProfileScreen() {
         </View>
       ) : (
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          {/* Summary Card */}
-          <View className="bg-white items-center py-10 border-b border-gray-50">
-            <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
-              {profile?.avatarUrl ? (
-                <Image className="rounded-full" 
-                  source={{ uri: profile.avatarUrl }} 
-                  style={{ width: 96, height: 96, borderRadius: 9999 }}
-                  contentFit="cover"
-                  transition={200}
-                />
-              ) : (
-              <Text style={{ fontFamily: "Poppins-Bold", fontSize: 36, color: "#136ADA" }}>
-                {profile?.fullName?.charAt(0) || "S"}
-              </Text>
-              )}
-            </View>
-            <Text className="text-black text-xl mb-1" style={{ fontFamily: "Poppins-Bold" }}>
-              {profile?.fullName || "Student"}
-            </Text>
-            <View className="bg-indigo-100 px-4 py-1 rounded-full mt-2">
-              <Text className="text-indigo-700 text-[10px] uppercase" style={{ fontFamily: "Poppins-Bold" }}>
-                HỌC SINH{classInfo ? ` • ${classInfo.className} (${classInfo.grade})` : ""}
-              </Text>
-            </View>
-          </View>
+          <ProfileHero
+            name={profile?.fullName || "Học sinh"}
+            avatarUrl={profile?.avatarUrl}
+            roleLabel={`Học sinh${classInfo ? ` • ${classInfo.className} (${classInfo.grade})` : ""}`}
+            fallbackInitial={profile?.fullName?.charAt(0) || "S"}
+          />
 
           {/* Details Section */}
-          <View className="p-6 gap-6">
+          <View className="px-6 pt-6 pb-4 gap-3">
             <InfoField label="Email" value={profile?.email ?? "—"} icon="mail-outline" />
             <InfoField label="Số điện thoại" value={(profile as any)?.phoneNumber ?? "—"} icon="call-outline" />
             <InfoField label="Địa chỉ" value={profile?.address ?? "—"} icon="location-outline" />
@@ -254,20 +238,6 @@ export default function StudentProfileScreen() {
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
-  );
-}
-
-function InfoField({ label, value, icon }: any) {
-  return (
-    <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl border border-white">
-      <View className="w-10 h-10 rounded-full bg-white items-center justify-center mr-4">
-        <Ionicons name={icon} size={20} color="#6366F1" />
-      </View>
-      <View className="flex-1">
-        <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px] uppercase tracking-wider">{label}</Text>
-        <Text style={{ fontFamily: "Poppins-Medium" }} className="text-black text-sm">{value}</Text>
-      </View>
-    </View>
   );
 }
 

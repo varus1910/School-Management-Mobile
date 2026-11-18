@@ -20,6 +20,7 @@ import * as ImagePicker from "expo-image-picker";
 import { userService } from "../../services/user.service";
 import { useAuthStore } from "../../store/authStore";
 import { UserResponse } from "../../types/user";
+import { InfoField, ProfileHero } from "../../components/ui/ProfileParts";
 
 export default function AdminProfileScreen() {
   const router = useRouter();
@@ -141,46 +142,15 @@ export default function AdminProfileScreen() {
         </View>
       ) : (
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          {/* Summary Card */}
-          <View className="bg-white items-center py-10 border-b border-gray-50">
-            <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
-              {profile?.avatarUrl ? (
-                <Image className="rounded-full" 
-                  source={{ uri: profile.avatarUrl }} 
-                  style={{ width: 96, height: 96, borderRadius: 9999 }}
-                  contentFit="cover"
-                  transition={200}
-                />
-              ) : (
-              <Text
-                style={{
-                  fontFamily: "Poppins-Bold",
-                  fontSize: 36,
-                  color: "#136ADA",
-                }}
-              >
-                {profile?.fullName?.charAt(0) || "A"}
-              </Text>
-              )}
-            </View>
-            <Text
-              className="text-black text-xl mb-1"
-              style={{ fontFamily: "Poppins-Bold" }}
-            >
-              {profile?.fullName || "Quản trị viên"}
-            </Text>
-            <View className="bg-indigo-100 px-4 py-1 rounded-full">
-              <Text
-                className="text-indigo-700 text-[10px] uppercase"
-                style={{ fontFamily: "Poppins-Bold" }}
-              >
-                QUẢN TRỊ VIÊN HỆ THỐNG
-              </Text>
-            </View>
-          </View>
+          <ProfileHero
+            name={profile?.fullName || "Quản trị viên"}
+            avatarUrl={profile?.avatarUrl}
+            roleLabel="Quản trị viên hệ thống"
+            fallbackInitial={profile?.fullName?.charAt(0) || "A"}
+          />
 
           {/* Details Section */}
-          <View className="p-6 gap-6">
+          <View className="px-6 pt-6 pb-4 gap-3">
             <InfoField
               label="Tên đăng nhập"
               value={profile?.userName ?? "—"}
@@ -319,30 +289,6 @@ export default function AdminProfileScreen() {
         </SafeAreaView>
       </Modal>
     </AdminPageWrapper>
-  );
-}
-
-function InfoField({ label, value, icon }: any) {
-  return (
-    <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl border border-white">
-      <View className="w-10 h-10 rounded-full bg-white items-center justify-center mr-4">
-        <Ionicons name={icon} size={20} color="#6366F1" />
-      </View>
-      <View className="flex-1">
-        <Text
-          style={{ fontFamily: "Poppins-Regular" }}
-          className="text-gray-400 text-[10px] uppercase tracking-wider"
-        >
-          {label}
-        </Text>
-        <Text
-          style={{ fontFamily: "Poppins-Medium" }}
-          className="text-black text-sm"
-        >
-          {value}
-        </Text>
-      </View>
-    </View>
   );
 }
 
