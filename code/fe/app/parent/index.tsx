@@ -21,6 +21,7 @@ import {
   EmptyLine,
   FloatingBody,
   HeroChip,
+  HeroProfileCard,
   HomeHero,
   LessonTimeline,
   PRIMARY,
@@ -88,7 +89,6 @@ export default function ParentDashboard() {
   const [isMenuVisible, setMenuVisible] = useState(false);
 
   const selectedIndex = children.findIndex((c) => c.studentId === child?.studentId);
-  const parentName = userInfo?.fullName?.split(" ").at(-1) ?? "Phụ huynh";
   const refreshing = isLoading || overview.loading;
 
   const onRefresh = () => {
@@ -120,10 +120,15 @@ export default function ParentDashboard() {
         {/* Hero: tài khoản phụ huynh + con đang xem */}
         <HomeHero
           eyebrow={`${greeting()} 👋`}
-          subtitle={undefined}
-          title={`Phụ huynh ${parentName}`}
           right={children.length > 0 ? <HeroChip icon="people" label={`${children.length} con`} /> : undefined}
         >
+          <HeroProfileCard
+            name={userInfo?.fullName ?? "Phụ huynh"}
+            avatarUrl={userInfo?.avatarUrl}
+            label="Phụ huynh"
+            subtitle={userInfo?.email}
+          />
+
           {isLoading && children.length === 0 ? (
             <View className="py-8">
               <ActivityIndicator color="white" />
