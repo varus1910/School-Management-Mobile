@@ -25,6 +25,7 @@ export default function AdminLayout() {
       <Stack.Screen name="students/index" options={{ title: "Danh sách học sinh" }} />
       <Stack.Screen name="students/[id]" options={{ title: "Chi tiết học sinh" }} />
       <Stack.Screen name="teachers/index" options={{ title: "Danh sách giáo viên" }} />
+      <Stack.Screen name="parents/index" options={{ title: "Quản lý phụ huynh" }} />
       <Stack.Screen name="teachers/[id]" options={{ title: "Chi tiết giáo viên" }} />
       <Stack.Screen name="class-years/index" options={{ title: "Quản lý lớp học" }} />
       <Stack.Screen name="class-years/create" options={{ title: "Mở lớp học mới" }} />
