@@ -15,6 +15,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { EmptyState, PageHeader } from "../../components/ui/PageHeader";
 import { Stack, router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
@@ -219,21 +220,12 @@ export default function AdminNotificationScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]">
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar hidden />
 
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View className="flex-1 items-center">
-          <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-            Thông báo hệ thống
-          </Text>
-        </View>
-        <View className="w-10" />
+      <View className="bg-white border-b border-gray-100">
+        <PageHeader title="Thông báo hệ thống" subtitle="Thông báo bạn đã nhận và đã gửi" />
       </View>
 
       {loading ? (
@@ -242,13 +234,14 @@ export default function AdminNotificationScreen() {
         </View>
       ) : notifications.length === 0 ? (
         <View className="flex-1 justify-center items-center">
-          <Ionicons name="notifications-off-outline" size={64} color="#CCC" />
-          <Text className="text-gray-400 mt-4 text-sm" style={{ fontFamily: "Poppins-Medium" }}>
-            Chưa có thông báo nào được nhận
-          </Text>
+          <EmptyState
+            icon="notifications-off-outline"
+            title="Chưa có thông báo nào"
+            description="Bạn có thể tạo thông báo mới để gửi tới người dùng."
+          />
           <TouchableOpacity
             onPress={() => setCreateVisible(true)}
-            className="mt-6 bg-bright-blue/10 px-6 py-3 rounded-full border border-bright-blue/20"
+            className="mb-16 bg-bright-blue/10 px-6 py-3 rounded-full border border-bright-blue/20"
           >
             <Text className="text-bright-blue text-sm" style={{ fontFamily: "Poppins-SemiBold" }}>
               + Tạo thông báo mới
@@ -262,16 +255,9 @@ export default function AdminNotificationScreen() {
             sections={notifications}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View className="flex-row items-center px-6 py-4 border-b border-gray-50/50">
-                {/* Unread Dot */}
-                <View className="w-4 items-center justify-center mr-2">
-                  {!item.isRead && (
-                    <View className="w-2.5 h-2.5 bg-bright-blue rounded-full" />
-                  )}
-                </View>
-
+              <View className={`flex-row items-center rounded-3xl p-4 mb-3 border ${item.isRead ? "bg-white border-gray-100" : "bg-blue-50/60 border-blue-100"}`}>
                 {/* Icon based on type */}
-                <View className="w-12 h-12 rounded-full mr-4 bg-bright-blue/10 items-center justify-center">
+                <View className="w-12 h-12 rounded-2xl mr-3 bg-bright-blue/10 items-center justify-center">
                   <Ionicons
                     name={
                       item.type === "Assignment"
@@ -299,6 +285,8 @@ export default function AdminNotificationScreen() {
                     {item.content}
                   </Text>
                 </View>
+
+                {!item.isRead && <View className="w-2 h-2 bg-bright-blue rounded-full mr-1" />}
 
                 {/* Menu / Delete Button */}
                 <View className="relative z-50">
@@ -339,14 +327,12 @@ export default function AdminNotificationScreen() {
               </View>
             )}
             renderSectionHeader={({ section: { title } }) => (
-              <View className="px-6 py-2 bg-gray-50/60 mt-2">
-                <Text className="text-gray-500 text-xs uppercase tracking-wider" style={{ fontFamily: "Poppins-SemiBold" }}>
-                  {title}
-                </Text>
-              </View>
+              <Text className="text-gray-500 text-xs uppercase tracking-widest mt-6 mb-3" style={{ fontFamily: "Poppins-SemiBold" }}>
+                {title}
+              </Text>
             )}
             stickySectionHeadersEnabled={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
           />
 
           {/* Floating Action Button */}
