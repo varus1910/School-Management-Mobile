@@ -4,100 +4,97 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  FlatList,
   RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState, memo } from "react";
+import { useState } from "react";
 import { useAuthStore } from "../../store/authStore";
-import { useConfigStore } from "../../store/configStore";
-import { useParentStore } from "../../store/parentStore";
+import { useParentStore, useSelectedChild } from "../../store/parentStore";
 import { ChildInfo } from "../../types/parent";
 import SideMenu from "@/components/SideMenu";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
+import { useChildOverview } from "../../components/parent/useChildOverview";
+import {
+  EmptyLine,
+  FloatingBody,
+  HeroChip,
+  HomeHero,
+  LessonTimeline,
+  PRIMARY,
+  SectionCard,
+  ShortcutGrid,
+  ShortcutItem,
+  StatTile,
+  formatMoney,
+  greeting,
+} from "../../components/home/HomeParts";
 
-const ChildCard = memo(
-  ({
-    item,
-    isSelected,
-    onPress,
-  }: {
-    item: ChildInfo;
-    isSelected: boolean;
-    onPress: () => void;
-  }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      className={`w-64 p-6 rounded-[32px] shadow-lg ${
-        isSelected ? "bg-[#136ADA] shadow-blue-100" : "bg-gray-100 shadow-gray-100"
-      }`}
-    >
-      <View className="flex-row justify-between items-start mb-6">
-        <View className="flex-row items-center gap-3 flex-1">
-          <View className={`${isSelected ? "bg-white/20" : "bg-white"} p-2 rounded-xl`}>
-            <Ionicons
-              name="school-outline"
-              size={22}
-              color={isSelected ? "white" : "#136ADA"}
-            />
-          </View>
-          <View className="flex-1">
-            <Text
-              numberOfLines={1}
-              className={`${isSelected ? "text-white" : "text-gray-800"} text-lg`}
-              style={{ fontFamily: "Poppins-Bold" }}
-            >
-              {item.fullName ?? "Học sinh"}
-            </Text>
-            <Text
-              className={`${isSelected ? "text-white/80" : "text-gray-400"} text-[10px]`}
-              style={{ fontFamily: "Poppins-Medium" }}
-            >
-              {item.className ? `Lớp ${item.className}` : "Chưa có lớp"}
-              {item.grade ? ` • Khối ${item.grade}` : ""}
-            </Text>
-          </View>
-        </View>
-      </View>
+const SHORTCUTS: ShortcutItem[] = [
+  { icon: "stats-chart", label: "Kết quả", route: "/parent/results", color: "#F97316", bg: "bg-orange-50" },
+  { icon: "calendar", label: "Điểm danh", route: "/parent/attendance", color: "#F43F5E", bg: "bg-rose-50" },
+  { icon: "time", label: "Lịch học", route: "/parent/timetable", color: "#D97706", bg: "bg-amber-50" },
+  { icon: "document-text", label: "Lịch thi", route: "/parent/exam-schedule", color: "#6366F1", bg: "bg-indigo-50" },
+  { icon: "card", label: "Học phí", route: "/parent/fees", color: "#14B8A6", bg: "bg-teal-50" },
+  { icon: "chatbubbles", label: "Tin nhắn", route: "/parent/chat", color: "#06B6D4", bg: "bg-cyan-50" },
+  { icon: "sparkles", label: "AI Chat", route: "/parent/ai-chat", color: "#8B5CF6", bg: "bg-violet-50" },
+];
 
-      <View className="flex-row items-center justify-between mt-2">
-        <View className="flex-row items-center gap-1">
-          <Ionicons
-            name="heart-outline"
-            size={14}
-            color={isSelected ? "white" : "#6B7280"}
-          />
-          <Text
-            className={`${isSelected ? "text-white" : "text-gray-600"} text-xs`}
-            style={{ fontFamily: "Poppins-Bold" }}
-          >
-            {item.relationship || "Con"}
+/** Ảnh học sinh: bo góc vuông mềm (khác ảnh tròn của tài khoản) và có huy hiệu mũ tốt nghiệp. */
+function Avatar({ child, size, badge = true }: { child: ChildInfo; size: number; badge?: boolean }) {
+  const initial = (child.fullName ?? "?").trim().split(" ").at(-1)?.[0]?.toUpperCase() ?? "?";
+  const radius = size * 0.3;
+  return (
+    <View style={{ width: size, height: size }}>
+      {child.avatarUrl ? (
+        <Image
+          source={{ uri: child.avatarUrl }}
+          style={{ width: size, height: size, borderRadius: radius }}
+          contentFit="cover"
+        />
+      ) : (
+        <View
+          className="bg-white/25 items-center justify-center"
+          style={{ width: size, height: size, borderRadius: radius }}
+        >
+          <Text style={{ fontFamily: "Poppins-Bold", fontSize: size * 0.4 }} className="text-white">
+            {initial}
           </Text>
         </View>
-        <View className={`${isSelected ? "bg-white/20" : "bg-white"} px-3 py-1.5 rounded-xl`}>
-          <Ionicons
-            name={isSelected ? "checkmark" : "arrow-forward"}
-            size={16}
-            color={isSelected ? "white" : "#136ADA"}
-          />
+      )}
+      {badge && (
+        <View
+          className="absolute bg-amber-400 items-center justify-center border-2 border-[#136ADA]"
+          style={{ right: -6, bottom: -6, width: size * 0.38, height: size * 0.38, borderRadius: size * 0.19 }}
+        >
+          <Ionicons name="school" size={size * 0.2} color="white" />
         </View>
-      </View>
-    </TouchableOpacity>
-  ),
-);
+      )}
+    </View>
+  );
+}
+
+function givenName(child: ChildInfo | null) {
+  return child?.fullName?.trim().split(" ").at(-1) ?? "con";
+}
 
 export default function ParentDashboard() {
   const { userInfo } = useAuthStore();
-  const { schoolYear } = useConfigStore();
-  const { children, selectedChildId, selectChild, isLoading, loadChildren } =
-    useParentStore();
-  const parentName = userInfo?.fullName?.split(" ").at(-1) ?? "Phụ huynh";
-
+  const { children, selectChild, isLoading, loadChildren } = useParentStore();
+  const child = useSelectedChild();
+  const overview = useChildOverview(child);
   const [isMenuVisible, setMenuVisible] = useState(false);
 
-  const selectedChild = children.find((c) => c.studentId === selectedChildId);
+  const selectedIndex = children.findIndex((c) => c.studentId === child?.studentId);
+  const parentName = userInfo?.fullName?.split(" ").at(-1) ?? "Phụ huynh";
+  const refreshing = isLoading || overview.loading;
+
+  const onRefresh = () => {
+    loadChildren();
+    overview.reload();
+  };
 
   return (
     <AdminPageWrapper
@@ -108,9 +105,7 @@ export default function ParentDashboard() {
         </TouchableOpacity>
       }
       rightComponent={
-        <TouchableOpacity
-          onPress={() => router.push("/parent/notifications" as any)}
-        >
+        <TouchableOpacity onPress={() => router.push("/parent/notifications" as any)}>
           <Ionicons name="notifications-outline" size={28} color="black" />
         </TouchableOpacity>
       }
@@ -120,211 +115,206 @@ export default function ParentDashboard() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={loadChildren} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Welcome Greeting */}
-        <View className="px-6 mt-6 mb-2">
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-black text-xl"
-          >
-            Xin chào, {parentName} 👋
-          </Text>
-          <Text
-            style={{ fontFamily: "Poppins-Regular" }}
-            className="text-gray-400 text-xs"
-          >
-            Theo dõi tình hình học tập của con trong năm học {schoolYear} -{" "}
-            {schoolYear + 1}.
-          </Text>
-        </View>
-
-        {/* Children Horizontal Section */}
-        <View className="mb-8 mt-4">
-          <View className="flex-row justify-between items-center px-6 mb-4">
-            <Text
-              style={{ fontFamily: "Poppins-SemiBold" }}
-              className="text-gray-500 text-xs mb-0 uppercase tracking-widest"
-            >
-              Con của bạn
-            </Text>
-          </View>
-
+        {/* Hero: tài khoản phụ huynh + con đang xem */}
+        <HomeHero
+          eyebrow={`${greeting()} 👋`}
+          subtitle={undefined}
+          title={`Phụ huynh ${parentName}`}
+          right={children.length > 0 ? <HeroChip icon="people" label={`${children.length} con`} /> : undefined}
+        >
           {isLoading && children.length === 0 ? (
-            <View className="py-10">
-              <ActivityIndicator size="large" color="#136ADA" />
+            <View className="py-8">
+              <ActivityIndicator color="white" />
             </View>
-          ) : (
-            <FlatList
-              data={children}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
-              renderItem={({ item }) => (
-                <ChildCard
-                  item={item}
-                  isSelected={item.studentId === selectedChildId}
-                  onPress={() => selectChild(item.studentId)}
-                />
-              )}
-              keyExtractor={(item) => item.studentId}
-              ListEmptyComponent={() => (
-                <View className="w-80 bg-gray-50 border border-gray-100 p-5 rounded-[32px] items-center justify-center">
-                  <Ionicons name="school-outline" size={32} color="#CCC" />
+          ) : child ? (
+            <View className="mt-4 bg-white/15 rounded-3xl p-4">
+              <View className="flex-row items-center justify-between mb-3">
+                <View className="flex-row items-center">
+                  <Ionicons name="heart" size={12} color="#FCD34D" />
                   <Text
-                    className="text-gray-400 mt-2 text-xs text-center"
-                    style={{ fontFamily: "Poppins-Medium" }}
+                    style={{ fontFamily: "Poppins-SemiBold" }}
+                    className="text-amber-200 text-[10px] ml-1.5 uppercase tracking-widest"
                   >
-                    Tài khoản chưa được gắn với học sinh nào.{"\n"}Vui lòng liên
-                    hệ nhà trường.
+                    Con của bạn
                   </Text>
                 </View>
-              )}
-            />
-          )}
-        </View>
-
-        {/* Services Grid */}
-        <View className="px-6 mb-8 mt-2">
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
-          >
-            Tiện ích theo dõi{selectedChild?.fullName ? ` • ${selectedChild.fullName}` : ""}
-          </Text>
-          <View className="flex-row flex-wrap justify-between gap-y-4">
-            <ParentCard
-              icon="card"
-              label="Học phí"
-              route="/parent/fees"
-              color="bg-teal-100"
-              iconColor="#14B8A6"
-            />
-            <ParentCard
-              icon="stats-chart"
-              label="Kết quả"
-              route="/parent/results"
-              color="bg-orange-100"
-              iconColor="#F97316"
-            />
-            <ParentCard
-              icon="calendar"
-              label="Điểm danh"
-              route="/parent/attendance"
-              color="bg-rose-100"
-              iconColor="#F43F5E"
-            />
-            <ParentCard
-              icon="time"
-              label="Lịch học"
-              route="/parent/timetable"
-              color="bg-amber-100"
-              iconColor="#D97706"
-            />
-            <ParentCard
-              icon="document-text"
-              label="Lịch thi"
-              route="/parent/exam-schedule"
-              color="bg-indigo-100"
-              iconColor="#6366F1"
-            />
-            <ParentCard
-              icon="sparkles"
-              label="AI Chat"
-              route="/parent/ai-chat"
-              color="bg-violet-100"
-              iconColor="#8B5CF6"
-            />
-            <ParentCard
-              icon="chatbubbles"
-              label="Tin nhắn"
-              route="/parent/chat"
-              color="bg-cyan-100"
-              iconColor="#06B6D4"
-            />
-          </View>
-        </View>
-
-        {/* Bottom Banner */}
-        <View className="px-6 pb-12 mt-2">
-          <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[160px] relative">
-            <View
-              className="absolute right-[-10] top-5 w-32 h-32 bg-teal-500/5 rounded-full"
-              style={{ transform: [{ scale: 1.5 }] }}
-            />
-
-            <View className="z-10 flex-1 justify-between">
-              <View>
-                <Text
-                  className="text-[#14B8A6] text-sm mb-1"
-                  style={{ fontFamily: "Poppins-Bold" }}
-                >
-                  Thông báo mới
-                </Text>
-                <Text
-                  className="text-gray-800 leading-snug"
-                  style={{ fontFamily: "Poppins-SemiBold", fontSize: 18 }}
-                  numberOfLines={2}
-                >
-                  Xem các thông báo về học phí và hoạt động của con.
-                </Text>
+                {children.length > 1 && (
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-white/70 text-[10px]">
+                    {selectedIndex + 1} / {children.length}
+                  </Text>
+                )}
               </View>
+              <View className="flex-row items-center">
+                <Avatar child={child} size={60} />
+                <View className="ml-4 flex-1">
+                  <Text numberOfLines={1} style={{ fontFamily: "Poppins-Bold" }} className="text-white text-xl">
+                    {child.fullName ?? "Học sinh"}
+                  </Text>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-white/80 text-xs">
+                    Học sinh • {child.className ? `Lớp ${child.className}` : "Chưa có lớp"}
+                    {child.grade ? ` • Khối ${child.grade}` : ""}
+                  </Text>
+                  {child.relationship ? (
+                    <Text style={{ fontFamily: "Poppins-Regular" }} className="text-white/60 text-[10px] mt-0.5">
+                      Bạn là: {child.relationship}
+                    </Text>
+                  ) : null}
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View className="mt-4 bg-white/15 rounded-3xl p-5">
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-white text-xs">
+                Tài khoản chưa được gắn với học sinh nào. Vui lòng liên hệ nhà trường.
+              </Text>
+            </View>
+          )}
 
-              <TouchableOpacity
-                onPress={() => router.push("/parent/notifications" as any)}
-                className="bg-teal-50 self-start px-5 py-2 rounded-xl mt-4"
+          {children.length > 1 && (
+            <View className="mt-4">
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-white/70 text-[10px] mb-2 uppercase tracking-widest"
               >
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-[#14B8A6] text-[10px] uppercase tracking-widest"
-                >
-                  Kiểm tra ngay
-                </Text>
-              </TouchableOpacity>
+                Chuyển sang con khác
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+                {children.map((c) => {
+                  const active = c.studentId === child?.studentId;
+                  return (
+                    <TouchableOpacity
+                      key={c.studentId}
+                      onPress={() => selectChild(c.studentId)}
+                      className={`flex-row items-center pl-2 pr-4 py-2 rounded-2xl ${
+                        active ? "bg-white" : "bg-white/15"
+                      }`}
+                    >
+                      <Avatar child={c} size={32} badge={false} />
+                      <View className="ml-2.5">
+                        <Text
+                          numberOfLines={1}
+                          style={{ fontFamily: "Poppins-SemiBold" }}
+                          className={`text-xs ${active ? "text-[#136ADA]" : "text-white"}`}
+                        >
+                          {givenName(c)}
+                        </Text>
+                        <Text
+                          style={{ fontFamily: "Poppins-Regular" }}
+                          className={`text-[10px] ${active ? "text-gray-400" : "text-white/70"}`}
+                        >
+                          {c.className ? `Lớp ${c.className}` : "Chưa có lớp"}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
+        </HomeHero>
+
+        {child && (
+          <FloatingBody>
+            {/* Hai chỉ số nhanh */}
+            <View className="flex-row gap-3">
+              <StatTile
+                icon="calendar"
+                label="Điểm danh tháng này"
+                onPress={() => router.push("/parent/attendance" as any)}
+                loading={overview.loading && !overview.attendance}
+                value={overview.attendance ? `${Math.round(overview.attendance.percentage)}%` : "—"}
+                sub={
+                  overview.attendance
+                    ? `${overview.attendance.present} có mặt • ${overview.attendance.absent} vắng`
+                    : "Chưa có dữ liệu"
+                }
+                tone={!overview.attendance ? "neutral" : overview.attendance.percentage >= 90 ? "good" : "warn"}
+              />
+              <StatTile
+                icon="card"
+                label="Học phí còn nợ"
+                onPress={() => router.push("/parent/fees" as any)}
+                loading={overview.loading && !overview.fees}
+                value={
+                  !overview.fees
+                    ? "—"
+                    : overview.fees.unpaidCount === 0
+                      ? "Đã đủ"
+                      : formatMoney(overview.fees.unpaidAmount)
+                }
+                sub={
+                  !overview.fees
+                    ? "Chưa có dữ liệu"
+                    : overview.fees.unpaidCount === 0
+                      ? "Không có khoản nào"
+                      : `${overview.fees.unpaidCount} khoản chưa đóng`
+                }
+                tone={!overview.fees ? "neutral" : overview.fees.unpaidCount === 0 ? "good" : "bad"}
+              />
             </View>
 
-            <View className="absolute right-4 bottom-4 opacity-10">
-              <Ionicons name="notifications" size={60} color="#14B8A6" />
-            </View>
-          </View>
-        </View>
+            {/* Hôm nay con học */}
+            <SectionCard
+              title={`Hôm nay ${givenName(child)} học`}
+              actionLabel="Cả tuần"
+              onAction={() => router.push("/parent/timetable" as any)}
+            >
+              {overview.loading && overview.todayLessons === null ? (
+                <ActivityIndicator color={PRIMARY} />
+              ) : overview.todayLessons === null ? (
+                <EmptyLine text="Không tải được thời khóa biểu." />
+              ) : overview.todayLessons.length === 0 ? (
+                <EmptyLine text={`Hôm nay ${givenName(child)} không có tiết học nào.`} />
+              ) : (
+                <LessonTimeline
+                  lessons={overview.todayLessons.map((l) => ({
+                    id: l.scheduleDetailId,
+                    subjectName: l.subjectName,
+                    startTime: l.startTime,
+                    finishTime: l.finishTime,
+                    timeRange: l.timeRange,
+                    extra: [l.roomName, l.teacherName].filter(Boolean).join(" • "),
+                  }))}
+                />
+              )}
+            </SectionCard>
+
+            {/* Lịch thi sắp tới */}
+            {overview.nextExam && (
+              <TouchableOpacity
+                onPress={() => router.push("/parent/exam-schedule" as any)}
+                className="mt-4 bg-indigo-50 rounded-3xl p-5 flex-row items-center"
+              >
+                <View className="w-12 h-12 rounded-2xl bg-white items-center justify-center">
+                  <Ionicons name="document-text" size={22} color="#6366F1" />
+                </View>
+                <View className="ml-4 flex-1">
+                  <Text
+                    style={{ fontFamily: "Poppins-SemiBold" }}
+                    className="text-indigo-500 text-[10px] uppercase tracking-widest"
+                  >
+                    Lịch thi sắp tới
+                  </Text>
+                  <Text numberOfLines={1} style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-base">
+                    {overview.nextExam.subjectName}
+                  </Text>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs">
+                    {new Date(overview.nextExam.date).toLocaleDateString("vi-VN")} •{" "}
+                    {overview.nextExam.startTime.slice(0, 5)} • {overview.nextExam.roomName}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#6366F1" />
+              </TouchableOpacity>
+            )}
+          </FloatingBody>
+        )}
+
+        <ShortcutGrid items={SHORTCUTS} />
       </ScrollView>
+
       <SideMenu visible={isMenuVisible} onClose={() => setMenuVisible(false)} />
     </AdminPageWrapper>
-  );
-}
-
-// --- Helper Components ---
-
-function ParentCard({
-  icon,
-  label,
-  route,
-  color,
-  iconColor,
-}: {
-  icon: string;
-  label: string;
-  route: string;
-  color: string;
-  iconColor: string;
-}) {
-  return (
-    <TouchableOpacity
-      onPress={() => router.push(route as any)}
-      className={`${color} w-[31%] py-6 rounded-2xl items-center justify-center gap-2`}
-    >
-      <View className="w-10 h-10 bg-white/50 rounded-full items-center justify-center">
-        <Ionicons name={icon as any} size={20} color={iconColor} />
-      </View>
-      <Text
-        style={{ fontFamily: "Poppins-Medium" }}
-        className="text-black text-xs text-center"
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
   );
 }
