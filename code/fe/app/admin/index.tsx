@@ -95,6 +95,13 @@ export default function AdminDashboard() {
       route: "/admin/teachers",
     },
     {
+      label: "Phụ huynh",
+      icon: "people-outline",
+      color: "bg-cyan-100",
+      iconColor: "#06B6D4",
+      route: "/admin/parents",
+    },
+    {
       label: "Lớp học",
       icon: "business-outline",
       color: "bg-teal-100",
