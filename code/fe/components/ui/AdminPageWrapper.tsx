@@ -1,3 +1,4 @@
+import { goBack } from "../../utils/navigation";
 import React from "react";
 import {
   View,
@@ -52,7 +53,7 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
             <View>{leftComponent}</View>
           ) : (
             <TouchableOpacity
-              onPress={onBack || (() => router.back())}
+              onPress={onBack || goBack}
               className="p-1"
             >
               <Ionicons name="arrow-back" size={24} color="black" />

@@ -24,6 +24,7 @@ import { TeacherResponse } from "../../types/teacher";
 import { getErrorMessage } from "../../utils/error";
 import { InfoField, ProfileHero } from "../../components/ui/ProfileParts";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { goBack } from "../../utils/navigation";
 
 export default function TeacherProfileScreen() {
   const { clearAuth, updateUserInfo } = useAuthStore();
@@ -55,7 +56,7 @@ export default function TeacherProfileScreen() {
     } catch (error) {
       console.log("Error loading teacher profile:", error);
       Alert.alert("Lỗi", "Không thể tải thông tin cá nhân.");
-      router.back();
+      goBack();
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,4 @@
+import { goBack } from "../../utils/navigation";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactNode } from "react";
@@ -21,7 +22,7 @@ export function PageHeader({
   return (
     <View className="flex-row items-center px-6 py-4 bg-white">
       <TouchableOpacity
-        onPress={onBack ?? (() => router.back())}
+        onPress={onBack ?? goBack}
         className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 items-center justify-center"
       >
         <Ionicons name="arrow-back" size={20} color="#111827" />
