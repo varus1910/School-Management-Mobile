@@ -82,7 +82,7 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
   };
 
   const getAvatarColor = (name: string) => {
-    const colors = ["bg-rose-500", "bg-blue-500", "bg-teal-500", "bg-indigo-500"];
+    const colors = ["bg-rose-500", "bg-blue-500", "bg-teal-500", "bg-blue-500"];
     const index = name.length % colors.length;
     return colors[index];
   };
@@ -113,7 +113,7 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          {loading && <ActivityIndicator size="small" color="#6366F1" />}
+          {loading && <ActivityIndicator size="small" color="#136ADA" />}
         </View>
       </View>
 
