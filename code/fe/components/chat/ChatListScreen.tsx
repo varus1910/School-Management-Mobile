@@ -310,7 +310,8 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
             <TouchableOpacity
               key={key}
               onPress={() => setActiveTab(key)}
-              className={`flex-1 py-2 rounded-xl items-center ${activeTab === key ? "bg-white shadow-sm shadow-gray-200" : ""}`}
+              className={`flex-1 py-2 rounded-xl items-center ${activeTab === key ? "bg-white" : ""}`}
+              style={activeTab === key ? { elevation: 2, shadowColor: "#000", shadowOpacity: 0.08, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } } : undefined}
             >
               <Text
                 style={{ fontFamily: activeTab === key ? "Poppins-SemiBold" : "Poppins-Medium" }}
