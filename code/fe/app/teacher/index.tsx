@@ -15,6 +15,7 @@ import {
   EmptyLine,
   FloatingBody,
   HeroChip,
+  HeroProfileCard,
   HomeHero,
   LessonTimeline,
   ListRow,
@@ -40,7 +41,6 @@ const SHORTCUTS: ShortcutItem[] = [
 export default function TeacherDashboard() {
   const { userInfo } = useAuthStore();
   const { schoolYear, term } = useConfigStore();
-  const teacherName = userInfo?.fullName?.split(" ").at(-1) ?? "Giáo viên";
 
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [homeroomClass, setHomeroomClass] = useState<any>(null);
@@ -154,16 +154,15 @@ export default function TeacherDashboard() {
       >
         <HomeHero
           eyebrow={`${greeting()} 👋`}
-          title={`Thầy/Cô ${teacherName}`}
-          subtitle={
-            todayLessons === null
-              ? `Năm học ${schoolYear} - ${schoolYear + 1} • Học kỳ ${term}`
-              : lessonCount === 0
-                ? "Hôm nay bạn không có tiết dạy nào."
-                : `Hôm nay bạn có ${lessonCount} tiết dạy.`
-          }
-          right={homeroomClass ? <HeroChip icon="star" label={`GVCN ${homeroomClass.className}`} /> : undefined}
-        />
+          right={<HeroChip icon="calendar" label={`Năm học ${schoolYear} • HK${term}`} />}
+        >
+          <HeroProfileCard
+            name={userInfo?.fullName ?? "Giáo viên"}
+            avatarUrl={userInfo?.avatarUrl}
+            label="Giáo viên"
+            subtitle={homeroomClass ? `Chủ nhiệm lớp ${homeroomClass.className}` : "Giáo viên bộ môn"}
+          />
+        </HomeHero>
 
         <FloatingBody>
           <View className="flex-row gap-3">
